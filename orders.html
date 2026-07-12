@@ -209,12 +209,15 @@ document.getElementById('signOutBtn').addEventListener('click', ()=>signOut(auth
 function subscribeOrders(uid){
   document.getElementById('ordersLoading').style.display='block';
   document.getElementById('ordersList').innerHTML='';
-  const q = query(collection(db,'orders'), where('customerUid','==',uid), orderBy('placedAt','desc'));
+  // Use simple query (no composite index needed) + sort client-side
+  const q = query(collection(db,'orders'), where('customerUid','==',uid));
   unsubscribe = onSnapshot(q, snap => {
     allOrders = snap.docs.map(d=>{
       const data=d.data();
       return {...data, _docId:d.id, placedAt:data.placedAt?.toDate?.()};
     });
+    // Sort newest first client-side
+    allOrders.sort((a,b)=>(b.placedAt||0)-(a.placedAt||0));
     document.getElementById('ordersLoading').style.display='none';
     renderOrders();
   }, err => {

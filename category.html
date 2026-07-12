@@ -604,14 +604,14 @@
         <img src="${i.image}" alt="${i.name}">
         <div class="ci-info">
           <h4>${i.name}</h4>
-          <div class="unit">${i.unit} · ${DFWStore.formatINR(i.price)}</div>
+          <div class="unit">${i.unit} · ${dfw_formatINR(i.price)}</div>
           <div class="ci-actions">
             <div class="qty-stepper">
               <button data-cdec="${i.id}">−</button>
               <span class="mono">${i.qty}</span>
               <button data-cinc="${i.id}">+</button>
             </div>
-            <span class="price" style="font-size:13px;">${DFWStore.formatINR(i.price*i.qty)}</span>
+            <span class="price" style="font-size:13px;">${dfw_formatINR(i.price*i.qty)}</span>
           </div>
           <button class="remove-link" data-remove="${i.id}">Remove</button>
         </div>
@@ -619,7 +619,7 @@
     `).join('');
     foot.innerHTML = `
       <div class="field"><label>Your Name</label>
-        <input type="text" id="custName" placeholder="e.g. Rahul Sharma" value="${localStorage.getItem('dfw_temp_name')||''}"></div>
+        <input type="text" id="custName" placeholder="e.g. Rahul Sharma" value="${localStorage.getItem('dfw_name')||''}"></div>
       <div class="field"><label>Your Phone Number</label>
         <input type="tel" id="custPhone" placeholder="e.g. 98765 43210" value="${localStorage.getItem('dfw_phone')||''}"></div>
       <div class="field"><label>Note (optional)</label>
