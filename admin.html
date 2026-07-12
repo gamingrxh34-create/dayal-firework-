@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Dayal Fire Works</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07070e;--panel:#0f0f1e;--panel-2:#151528;
+  --fire:#ff6b1a;--fire-soft:#ff9a4d;--crimson:#e01a2e;
+  --spark:#ffd700;--spark-soft:#ffe566;--ember:#ff8c00;--green:#2dba6a;
+  --text:#f5f0e8;--muted:#8b92b8;--line:rgba(255,107,26,.18);--radius:12px;
+}
+*{box-sizing:border-box;} body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;}
+h1,h2,.display{font-family:'Anton',sans-serif;font-weight:400;letter-spacing:.4px;text-transform:uppercase;}
+.mono{font-family:'JetBrains Mono',monospace;} button{font-family:inherit;cursor:pointer;} input,textarea,select{font-family:inherit;}
+
+/* ── Auth Gate ── */
+.auth-gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(ellipse at 30% 0%,rgba(224,26,46,.15),transparent 50%),var(--bg);}
+.auth-card{background:var(--panel);border:1px solid var(--spark);border-radius:16px;padding:40px 32px;max-width:400px;width:100%;text-align:center;box-shadow:0 0 60px rgba(255,215,0,.1);}
+.auth-card .icon{font-size:50px;margin-bottom:16px;}
+.auth-card h2{font-size:22px;color:var(--spark-soft);margin:0 0 10px;}
+.auth-card p{color:var(--muted);font-size:13.5px;line-height:1.6;margin:0 0 22px;}
+.auth-card .access-denied{background:rgba(224,26,46,.1);border:1px solid rgba(224,26,46,.4);border-radius:10px;padding:14px;font-size:13px;color:#ff8096;margin:10px 0;}
+.sign-in-btn{display:inline-flex;align-items:center;gap:8px;background:white;color:#333;border:none;padding:12px 22px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.3);}
+.sign-in-btn:hover{box-shadow:0 4px 24px rgba(0,0,0,.5);}
+.sign-in-btn img{width:20px;height:20px;}
+
+/* ── App Shell ── */
+#app{display:none;}
+header{border-bottom:1px solid var(--line);padding:14px 22px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:rgba(7,7,14,.92);backdrop-filter:blur(8px);z-index:20;}
+header .display{font-size:17px;color:var(--spark-soft);}
+.header-right{display:flex;align-items:center;gap:10px;}
+.user-chip{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);}
+.user-chip img{width:28px;height:28px;border-radius:50%;border:1px solid var(--line);}
+.btn{padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);font-size:13px;font-weight:600;}
+.btn-primary{background:linear-gradient(135deg,var(--spark),var(--ember));color:#1a0900;border:none;}
+.btn-danger{background:transparent;border:1px solid rgba(224,26,46,.5);color:var(--crimson);}
+.btn-success{background:var(--green);color:#062712;border:none;}
+.btn-view{background:transparent;border:1px solid var(--line);color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;}
+
+.tabs{display:flex;gap:4px;padding:14px 22px 0;max-width:1200px;margin:0 auto;flex-wrap:wrap;}
+.tab{padding:8px 16px;border-radius:8px 8px 0 0;background:transparent;border:1px solid transparent;color:var(--muted);font-weight:600;font-size:13px;}
+.tab.active{background:var(--panel);border-color:var(--line);border-bottom-color:var(--panel);color:var(--spark-soft);}
+.content{max-width:1200px;margin:0 auto;padding:22px;}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px;}
+.panel+.panel{margin-top:18px;}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.toolbar h2{font-size:15px;margin:0;color:var(--spark-soft);}
+.search-input{background:var(--panel-2);border:1px solid var(--line);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;min-width:180px;}
+
+/* ── Stats ── */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px;}
+.stat-card{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:14px;text-align:center;}
+.stat-num{font-family:'JetBrains Mono';font-size:24px;font-weight:700;color:var(--spark-soft);}
+.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:3px;}
+
+/* ── Orders ── */
+.order-card{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:15px 17px;margin-bottom:13px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start;}
+.order-id-row{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+.order-id{font-family:'JetBrains Mono';font-size:12px;font-weight:700;color:var(--spark);}
+.status-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;}
+.order-customer{font-weight:700;font-size:13.5px;margin-bottom:2px;}
+.order-meta{font-size:12px;color:var(--muted);}
+.items-mini{margin:7px 0 0;padding:0;list-style:none;}
+.items-mini li{font-size:12px;color:var(--muted);display:flex;justify-content:space-between;padding:2px 0;}
+.order-total-badge{font-family:'JetBrains Mono';font-weight:700;color:var(--spark-soft);font-size:14px;margin-top:7px;}
+.order-actions-col{display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
+.status-select{background:var(--panel);border:1px solid var(--line);color:var(--text);padding:6px 10px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;}
+.no-orders{text-align:center;color:var(--muted);padding:60px 20px;font-size:14px;}
+.orders-error{background:rgba(224,26,46,.1);border:1px solid rgba(224,26,46,.4);border-radius:8px;padding:13px 16px;font-size:13px;color:#ff8096;margin-bottom:14px;}
+.live-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--green);font-weight:700;}
+.live-dot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:pulse 1.5s ease infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(1.4);}}
+
+/* ── Products table ── */
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{text-align:left;color:var(--muted);font-weight:600;padding:7px 10px;border-bottom:1px solid var(--line);font-size:11px;text-transform:uppercase;letter-spacing:.4px;}
+td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+.prod-thumb{width:40px;height:40px;border-radius:8px;object-fit:cover;background:var(--panel-2);}
+.prod-name{font-weight:600;}
+.prod-cat{color:var(--muted);font-size:12px;}
+.row-actions{display:flex;gap:6px;}
+.icon-btn{background:none;border:1px solid var(--line);border-radius:6px;padding:5px 9px;color:var(--muted);font-size:12px;}
+.icon-btn.danger{color:var(--crimson);border-color:rgba(224,26,46,.4);}
+.badge-tag{background:var(--panel-2);color:var(--spark-soft);font-size:10px;padding:2px 7px;border-radius:99px;}
+.stock-toggle{display:inline-flex;align-items:center;gap:5px;font-size:12px;}
+
+/* ── Product Form ── */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;}
+.form-grid .full{grid-column:1/-1;}
+.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px;font-weight:600;}
+.field input,.field select,.field textarea{width:100%;background:var(--panel-2);border:1px solid var(--line);color:var(--text);padding:9px 11px;border-radius:8px;font-size:13px;}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--fire);}
+.field textarea{resize:vertical;min-height:56px;}
+.field{margin-bottom:3px;}
+.img-upload{display:flex;align-items:center;gap:12px;margin-top:5px;}
+.img-preview{width:64px;height:64px;border-radius:9px;object-fit:cover;background:var(--panel-2);border:1px solid var(--line);}
+.form-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px;grid-column:1/-1;}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr;}}
+
+/* ── Settings ── */
+.field-group{margin-bottom:14px;}
+
+/* ── Toast ── */
+.toast{position:fixed;bottom:22px;right:22px;background:var(--green);color:#062712;padding:11px 18px;border-radius:8px;font-weight:700;font-size:13px;opacity:0;transform:translateY(8px);transition:all .25s;z-index:100;max-width:300px;}
+.toast.show{opacity:1;transform:translateY(0);}
+.toast.error{background:var(--crimson);color:#fff;}
+
+/* ── Confirm Modal ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:90;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.show{display:flex;}
+.modal{background:var(--panel);border:1px solid var(--line);border-radius:14px;max-width:420px;width:100%;padding:24px;}
+.modal h3{margin:0 0 8px;font-size:16px;color:var(--spark-soft);}
+.modal p{color:var(--muted);font-size:13px;line-height:1.6;}
+.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px;}
+.empty-state{text-align:center;color:var(--muted);padding:50px 0;font-size:13px;}
+</style>
+</head>
+<body>
+
+<!-- Auth Gate -->
+<div id="authGate" class="auth-gate">
+  <div class="auth-card">
+    <div class="icon">🔐</div>
+    <h2>Admin Panel</h2>
+    <p>Sign in with your admin Google account to manage products, view orders, and update the shop.</p>
+    <div id="authError" class="access-denied" style="display:none;"></div>
+    <button class="sign-in-btn" id="signInBtn">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G">
+      Sign in with Google
+    </button>
+  </div>
+</div>
+
+<!-- App -->
+<div id="app">
+  <header>
+    <div class="display">Dayal Fire Works — Admin</div>
+    <div class="header-right">
+      <div class="live-badge"><span class="live-dot"></span>Live</div>
+      <div class="user-chip" id="userChip"></div>
+      <a href="index.html" target="_blank" class="btn btn-view">View Site ↗</a>
+      <button class="btn" id="signOutBtn">Sign Out</button>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="orders">📋 Orders</button>
+    <button class="tab" data-tab="products">🛒 Products</button>
+    <button class="tab" data-tab="settings">⚙️ Settings</button>
+    <button class="tab" data-tab="backup">💾 Backup</button>
+  </div>
+
+  <div class="content">
+    <!-- ORDERS -->
+    <div class="tab-panel" id="tab-orders">
+      <div class="panel">
+        <div class="toolbar">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <h2>Incoming Orders</h2>
+            <div class="live-badge"><span class="live-dot"></span>Auto-updating</div>
+          </div>
+          <select id="orderFilter" class="status-select">
+            <option value="all">All Orders</option>
+            <option value="New">New</option>
+            <option value="Confirmed">Confirmed</option>
+            <option value="Ready for Pickup">Ready for Pickup</option>
+            <option value="Delivered">Delivered</option>
+          </select>
+        </div>
+        <div class="stats-row" id="ordersStats" style="display:none;"></div>
+        <div id="ordersError" class="orders-error" style="display:none;"></div>
+        <div id="ordersLoading" style="text-align:center;color:var(--muted);padding:40px;">⏳ Connecting to database…</div>
+        <div id="ordersList"></div>
+      </div>
+    </div>
+
+    <!-- PRODUCTS -->
+    <div class="tab-panel" id="tab-products" style="display:none;">
+      <div class="panel">
+        <div class="toolbar"><h2>Add Product</h2></div>
+        <div id="productForm"></div>
+      </div>
+      <div class="panel">
+        <div class="toolbar">
+          <h2>All Products</h2>
+          <input type="text" class="search-input" id="searchInput" placeholder="Search products…">
+        </div>
+        <div style="overflow-x:auto;"><table id="productTable"></table></div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="tab-panel" id="tab-settings" style="display:none;">
+      <div class="panel">
+        <div class="toolbar"><h2>Shop Settings</h2></div>
+        <div id="settingsForm"></div>
+      </div>
+    </div>
+
+    <!-- BACKUP -->
+    <div class="tab-panel" id="tab-backup" style="display:none;">
+      <div class="panel">
+        <div class="toolbar"><h2>Backup & Restore</h2></div>
+        <p style="color:var(--muted);font-size:13px;line-height:1.7;">Your data is stored in Firebase (the cloud) and is always safe. You can also download a local JSON backup.</p>
+        <div style="display:flex;gap:12px;margin-top:14px;flex-wrap:wrap;">
+          <button class="btn btn-primary" id="exportBtn">⬇ Download JSON Backup</button>
+          <label class="btn" style="display:inline-flex;align-items:center;cursor:pointer;">
+            ⬆ Restore from JSON <input type="file" id="importFile" accept=".json" style="display:none;">
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal">
+    <h3 id="confirmTitle"></h3>
+    <p id="confirmBody"></p>
+    <div class="modal-actions">
+      <button class="btn" id="confirmCancel">Cancel</button>
+      <button class="btn btn-danger" id="confirmOk">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script src="store.js"></script>
+<script type="module">
+import { initializeApp }    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+                              from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getFirestore, collection, doc, getDoc, getDocs, setDoc, addDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy, serverTimestamp }
+                              from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { firebaseConfig, ADMIN_EMAIL } from './firebase-config.js';
+
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+const provider = new GoogleAuthProvider();
+
+let products   = [];
+let settings   = dfw_getSettings();
+let allOrders  = [];
+let editingId  = null;
+let pendingImg = null;
+let unsubOrders= null;
+
+// ── Auth ──
+onAuthStateChanged(auth, async user => {
+  if (!user){
+    document.getElementById('authGate').style.display='flex';
+    document.getElementById('app').style.display='none';
+    if(unsubOrders){unsubOrders();unsubOrders=null;}
+    return;
+  }
+  if (user.email !== ADMIN_EMAIL){
+    document.getElementById('authGate').style.display='flex';
+    document.getElementById('app').style.display='none';
+    const errEl=document.getElementById('authError');
+    errEl.style.display='block';
+    errEl.textContent=`⚠ Access denied for ${user.email}. Only the shop admin can log in here.`;
+    await signOut(auth);
+    return;
+  }
+  document.getElementById('authGate').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('userChip').innerHTML=`<img src="${user.photoURL||''}" alt=""> ${user.displayName||user.email}`;
+  await loadProducts();
+  await loadSettings();
+  subscribeOrders();
+  renderProductForm(null);
+  renderProductTable();
+  renderSettingsForm();
+});
+
+document.getElementById('signInBtn').addEventListener('click',async()=>{try{await signInWithPopup(auth,provider);}catch(e){}});
+document.getElementById('signOutBtn').addEventListener('click',()=>signOut(auth));
+
+// ── Tabs ──
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    document.querySelectorAll('.tab-panel').forEach(p=>p.style.display='none');
+    document.getElementById('tab-'+tab.dataset.tab).style.display='block';
+  });
+});
+
+// ── Toast ──
+function toast(msg,isErr=false){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(isErr?' error':'');setTimeout(()=>t.classList.remove('show'),3000);}
+
+// ── Load data from Firestore ──
+async function loadProducts(){
+  try{
+    const snap=await getDocs(collection(db,'products'));
+    if(!snap.empty) products=snap.docs.map(d=>({id:d.id,...d.data()}));
+    else products=[...DFW_SEED_PRODUCTS];
+  }catch(e){products=dfw_getCachedProducts();}
+}
+async function loadSettings(){
+  try{
+    const snap=await getDoc(doc(db,'settings','shop'));
+    if(snap.exists()) settings={...settings,...snap.data()};
+  }catch(e){}
+  dfw_saveSettings(settings);
+}
+
+// ── Orders real-time subscription ──
+function subscribeOrders(){
+  const q=query(collection(db,'orders'),orderBy('placedAt','desc'));
+  unsubOrders=onSnapshot(q, snap=>{
+    allOrders=snap.docs.map(d=>({_docId:d.id,...d.data(),placedAt:d.data().placedAt?.toDate?.()}));
+    document.getElementById('ordersLoading').style.display='none';
+    renderOrders();
+  }, err=>{
+    document.getElementById('ordersLoading').style.display='none';
+    document.getElementById('ordersError').style.display='block';
+    document.getElementById('ordersError').textContent='⚠ '+err.message;
+  });
+}
+
+function renderOrders(){
+  const filter=document.getElementById('orderFilter').value;
+  const list=filter==='all'?allOrders:allOrders.filter(o=>o.status===filter);
+  const statsEl=document.getElementById('ordersStats');
+  const total=allOrders.reduce((s,o)=>s+Number(o.total||0),0);
+  statsEl.innerHTML=`
+    <div class="stat-card"><div class="stat-num">${allOrders.length}</div><div class="stat-label">Total Orders</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--crimson);">${allOrders.filter(o=>o.status==='New').length}</div><div class="stat-label">New</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--green);">${allOrders.filter(o=>o.status==='Delivered').length}</div><div class="stat-label">Delivered</div></div>
+    <div class="stat-card"><div class="stat-num">${dfw_formatINR(total)}</div><div class="stat-label">Revenue</div></div>
+  `;
+  statsEl.style.display='grid';
+  const listEl=document.getElementById('ordersList');
+  if(!list.length){listEl.innerHTML='<div class="no-orders">📦 No orders yet. They will appear here in real time.</div>';return;}
+  listEl.innerHTML=list.map(o=>{
+    const items=Array.isArray(o.items)?o.items:[];
+    const date=o.placedAt?o.placedAt.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:true}):'—';
+    const color=dfw_statusColor(o.status); const bg=dfw_statusBg(o.status);
+    return `<div class="order-card">
+      <div>
+        <div class="order-id-row">
+          <span class="order-id">${o.orderId||o._docId}</span>
+          <span class="status-badge" style="background:${bg};color:${color};">${o.status||'New'}</span>
+        </div>
+        <div class="order-customer">${o.customerName||'—'}</div>
+        <div class="order-meta">📞 ${o.customerPhone||'—'} &nbsp;·&nbsp; ${date} ${o.customerEmail?'&nbsp;·&nbsp; 📧 '+o.customerEmail:''}</div>
+        ${o.note?`<div class="order-meta" style="margin-top:3px;">📝 ${o.note}</div>`:''}
+        <ul class="items-mini">${items.map(i=>`<li><span>${i.name} ×${i.qty}</span><span>${dfw_formatINR(i.price*i.qty)}</span></li>`).join('')}</ul>
+        <div class="order-total-badge">${dfw_formatINR(o.total||0)}</div>
+      </div>
+      <div class="order-actions-col">
+        <select class="status-select" data-docid="${o._docId}" id="sel-${o._docId}">
+          ${['New','Confirmed','Ready for Pickup','Delivered','Cancelled'].map(s=>`<option value="${s}" ${o.status===s?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </div>
+    </div>`;
+  }).join('');
+  listEl.querySelectorAll('[data-docid]').forEach(sel=>{
+    sel.addEventListener('change',async()=>{
+      try{
+        await updateDoc(doc(db,'orders',sel.dataset.docid),{status:sel.value,updatedAt:serverTimestamp()});
+        toast('✓ Status updated to '+sel.value);
+      }catch(e){toast('⚠ Failed: '+e.message,true);}
+    });
+  });
+}
+document.getElementById('orderFilter').addEventListener('change',renderOrders);
+
+// ── Product Form ──
+function renderProductForm(product){
+  editingId=product?product.id:null;
+  pendingImg=product?product.image:null;
+  const cats=[...new Set(products.map(p=>p.category)),...DFW_CATEGORIES].filter((v,i,a)=>a.indexOf(v)===i);
+  document.getElementById('productForm').innerHTML=`
+    <div class="form-grid">
+      <div class="field"><label>Product Name</label><input type="text" id="f_name" value="${product?product.name:''}"></div>
+      <div class="field"><label>Category</label>
+        <select id="f_cat">${cats.map(c=>`<option value="${c}" ${product&&product.category===c?'selected':''}>${c}</option>`).join('')}<option value="__new__">+ New…</option></select>
+        <input type="text" id="f_newCat" placeholder="New category name" style="display:none;margin-top:7px;">
+      </div>
+      <div class="field"><label>Price (₹)</label><input type="number" id="f_price" min="0" step="1" value="${product?product.price:''}"></div>
+      <div class="field"><label>Unit</label><input type="text" id="f_unit" value="${product?product.unit:''}" placeholder="per box (10 pcs)"></div>
+      <div class="field"><label>Badge (optional)</label><input type="text" id="f_badge" value="${product&&product.badge?product.badge:''}" placeholder="Bestseller, New, Green Cracker…"></div>
+      <div class="field"><label>Photo</label>
+        <div class="img-upload">
+          <img id="f_imgPrev" class="img-preview" src="${product?product.image:dfw_placeholderImage('🧨','#1b2338')}">
+          <input type="file" id="f_imgFile" accept="image/*">
+        </div>
+      </div>
+      <div class="field full"><label>Description (optional)</label><textarea id="f_desc">${product&&product.description?product.description:''}</textarea></div>
+      <div class="field full" style="display:flex;align-items:center;gap:8px;"><input type="checkbox" id="f_stock" ${!product||product.stock?'checked':''}><label for="f_stock" style="margin:0;">In stock</label></div>
+      <div class="form-actions">
+        ${product?'<button class="btn" id="f_cancel">Cancel</button>':''}
+        <button class="btn btn-primary" id="f_save">${product?'Save Changes':'Add Product'}</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('f_cat').addEventListener('change',e=>{document.getElementById('f_newCat').style.display=e.target.value==='__new__'?'block':'none';});
+  document.getElementById('f_imgFile').addEventListener('change',async e=>{
+    const file=e.target.files[0];if(!file)return;
+    pendingImg=await dfw_resizeImage(file);
+    document.getElementById('f_imgPrev').src=pendingImg;
+  });
+  document.getElementById('f_save').addEventListener('click',saveProduct);
+  if(product) document.getElementById('f_cancel').addEventListener('click',()=>renderProductForm(null));
+}
+
+async function saveProduct(){
+  const name=document.getElementById('f_name').value.trim();
+  let category=document.getElementById('f_cat').value;
+  if(category==='__new__') category=document.getElementById('f_newCat').value.trim();
+  const price=parseFloat(document.getElementById('f_price').value);
+  const unit=document.getElementById('f_unit').value.trim()||'per piece';
+  const badge=document.getElementById('f_badge').value.trim();
+  const description=document.getElementById('f_desc').value.trim();
+  const stock=document.getElementById('f_stock').checked;
+  if(!name||!category||isNaN(price)||price<0){toast('⚠ Please fill in name, category and price.',true);return;}
+  const image=pendingImg||dfw_placeholderImage('🧨','#1b2338');
+  const btn=document.getElementById('f_save'); btn.disabled=true; btn.textContent='Saving…';
+  try{
+    const data={name,category,price,unit,badge,description,stock,image,updatedAt:serverTimestamp()};
+    if(editingId){
+      await setDoc(doc(db,'products',editingId),data,{merge:true});
+      const idx=products.findIndex(p=>p.id===editingId); if(idx>=0) products[idx]={id:editingId,...data};
+      toast('✓ Product updated');
+    } else {
+      const ref=await addDoc(collection(db,'products'),{...data,createdAt:serverTimestamp()});
+      products.push({id:ref.id,...data});
+      toast('✓ Product added');
+    }
+    renderProductForm(null); renderProductTable();
+  }catch(e){toast('⚠ '+e.message,true);}
+  btn.disabled=false; btn.textContent=editingId?'Save Changes':'Add Product';
+}
+
+function renderProductTable(filter){
+  const table=document.getElementById('productTable');
+  let list=products;
+  if(filter){const f=filter.toLowerCase();list=list.filter(p=>p.name.toLowerCase().includes(f)||p.category.toLowerCase().includes(f));}
+  if(!list.length){table.innerHTML=`<tr><td class="empty-state">No products found.</td></tr>`;return;}
+  table.innerHTML=`<thead><tr><th></th><th>Product</th><th>Category</th><th>Price</th><th>Stock</th><th></th></tr></thead>
+    <tbody>${list.map(p=>`<tr>
+      <td><img class="prod-thumb" src="${p.image}"></td>
+      <td><div class="prod-name">${p.name} ${p.badge?`<span class="badge-tag">${p.badge}</span>`:''}</div><div class="prod-cat">${p.unit}</div></td>
+      <td class="prod-cat">${p.category}</td>
+      <td class="mono">${dfw_formatINR(p.price)}</td>
+      <td><label class="stock-toggle"><input type="checkbox" data-stock="${p.id}" ${p.stock?'checked':''}> ${p.stock?'In stock':'Out of stock'}</label></td>
+      <td><div class="row-actions">
+        <button class="icon-btn" data-edit="${p.id}">Edit</button>
+        <button class="icon-btn danger" data-delete="${p.id}">Delete</button>
+      </div></td>
+    </tr>`).join('')}</tbody>`;
+  table.querySelectorAll('[data-edit]').forEach(b=>b.addEventListener('click',()=>{const p=products.find(x=>x.id===b.dataset.edit);renderProductForm(p);window.scrollTo({top:0,behavior:'smooth'});}));
+  table.querySelectorAll('[data-delete]').forEach(b=>b.addEventListener('click',()=>{
+    confirmAction('Delete this product?','This will remove it from your storefront permanently.',async()=>{
+      try{await deleteDoc(doc(db,'products',b.dataset.delete));products=products.filter(x=>x.id!==b.dataset.delete);renderProductTable(document.getElementById('searchInput').value);toast('✓ Product deleted');}
+      catch(e){toast('⚠ '+e.message,true);}
+    });
+  }));
+  table.querySelectorAll('[data-stock]').forEach(cb=>cb.addEventListener('change',async()=>{
+    const p=products.find(x=>x.id===cb.dataset.stock);if(!p)return;
+    p.stock=cb.checked;
+    try{await updateDoc(doc(db,'products',p.id),{stock:p.stock});renderProductTable(document.getElementById('searchInput').value);}
+    catch(e){toast('⚠ '+e.message,true);}
+  }));
+}
+document.getElementById('searchInput').addEventListener('input',e=>renderProductTable(e.target.value));
+
+// ── Settings Form ──
+function renderSettingsForm(){
+  document.getElementById('settingsForm').innerHTML=`
+    <div class="form-grid">
+      <div class="field"><label>Shop Name</label><input type="text" id="s_name" value="${settings.shopName}"></div>
+      <div class="field"><label>Tagline</label><input type="text" id="s_tagline" value="${settings.tagline}"></div>
+      <div class="field"><label>Owner Name</label><input type="text" id="s_owner" value="${settings.ownerName||''}"></div>
+      <div class="field"><label>Owner Email (optional)</label><input type="email" id="s_email" value="${settings.ownerEmail||''}"></div>
+      <div class="field full"><label>WhatsApp Number (with country code, no +)</label><input type="text" id="s_wa" value="${settings.whatsapp}"></div>
+      <div class="field full"><label>Display Phone Numbers (comma separated)</label><input type="text" id="s_phones" value="${settings.altPhones.join(', ')}"></div>
+      <div class="field full"><label>Address</label><input type="text" id="s_address" value="${settings.address}"></div>
+      <div class="field full"><label>Google Maps Link (optional)</label><input type="url" id="s_maps" value="${settings.googleMapsLink||''}" placeholder="https://maps.google.com/..."></div>
+      <div class="field full"><label>Shop Logo</label>
+        <div class="img-upload">
+          <img id="s_logoPrev" class="img-preview" src="${settings.logoImage||dfw_placeholderImage('🧨','#1b2338')}" style="border-radius:50%;">
+          <input type="file" id="s_logoFile" accept="image/*">
+        </div>
+      </div>
+      <div class="form-actions"><button class="btn btn-primary" id="s_save">Save Settings</button></div>
+    </div>
+  `;
+  document.getElementById('s_logoFile').addEventListener('change',async e=>{
+    const file=e.target.files[0];if(!file)return;
+    const resized=await dfw_resizeImage(file,300,.85);
+    settings.logoImage=resized; document.getElementById('s_logoPrev').src=resized;
+  });
+  document.getElementById('s_save').addEventListener('click',async()=>{
+    settings.shopName=document.getElementById('s_name').value.trim();
+    settings.tagline=document.getElementById('s_tagline').value.trim();
+    settings.ownerName=document.getElementById('s_owner').value.trim();
+    settings.ownerEmail=document.getElementById('s_email').value.trim();
+    settings.whatsapp=document.getElementById('s_wa').value.trim().replace(/\D/g,'');
+    settings.altPhones=document.getElementById('s_phones').value.split(',').map(s=>s.trim()).filter(Boolean);
+    settings.address=document.getElementById('s_address').value.trim();
+    settings.googleMapsLink=document.getElementById('s_maps').value.trim();
+    dfw_saveSettings(settings);
+    try{await setDoc(doc(db,'settings','shop'),settings,{merge:true});toast('✓ Settings saved');}
+    catch(e){toast('⚠ '+e.message,true);}
+  });
+}
+
+// ── Backup ──
+document.getElementById('exportBtn').addEventListener('click',()=>{
+  const blob=new Blob([JSON.stringify({products,settings,exportedAt:new Date().toISOString()},null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='dayal-fireworks-backup-'+new Date().toISOString().slice(0,10)+'.json'; a.click();
+  toast('✓ Backup downloaded');
+});
+document.getElementById('importFile').addEventListener('change',e=>{
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const data=JSON.parse(ev.target.result);
+      confirmAction('Restore this backup?','This will replace current products and settings with those from the backup file.',async()=>{
+        if(data.products){
+          for(const p of data.products) await setDoc(doc(db,'products',p.id),p);
+          products=data.products;renderProductTable();
+        }
+        if(data.settings){settings={...settings,...data.settings};await setDoc(doc(db,'settings','shop'),settings,{merge:true});dfw_saveSettings(settings);}
+        toast('✓ Backup restored');
+      });
+    }catch(e){toast('⚠ Could not read file.',true);}
+  };
+  reader.readAsText(file);
+});
+
+// ── Confirm Modal ──
+function confirmAction(title,body,onConfirm){
+  document.getElementById('confirmTitle').textContent=title;
+  document.getElementById('confirmBody').textContent=body;
+  document.getElementById('confirmModal').classList.add('show');
+  const ok=document.getElementById('confirmOk'); const cancel=document.getElementById('confirmCancel');
+  function cleanup(){document.getElementById('confirmModal').classList.remove('show');ok.removeEventListener('click',onOk);cancel.removeEventListener('click',cleanup);}
+  function onOk(){cleanup();onConfirm();}
+  ok.addEventListener('click',onOk); cancel.addEventListener('click',cleanup);
+}
+</script>
+</body>
+</html>
