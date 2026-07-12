@@ -212,6 +212,7 @@ tr:last-child td{border-bottom:none;}
           <label class="btn" style="display:inline-flex;align-items:center;cursor:pointer;">
             ⬆ Restore from JSON <input type="file" id="importFile" accept=".json" style="display:none;">
           </label>
+          <button class="btn btn-success" id="seedBtn">🌱 Import 15 Starter Products</button>
         </div>
       </div>
     </div>
@@ -520,6 +521,32 @@ document.getElementById('exportBtn').addEventListener('click',()=>{
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
   a.download='dayal-fireworks-backup-'+new Date().toISOString().slice(0,10)+'.json'; a.click();
   toast('✓ Backup downloaded');
+});
+
+document.getElementById('seedBtn').addEventListener('click',()=>{
+  confirmAction(
+    'Import 15 starter products?',
+    'This will add all 15 default products to your Firebase database. You can edit or delete them afterwards.',
+    async () => {
+      const btn = document.getElementById('seedBtn');
+      btn.disabled = true; btn.textContent = '⏳ Importing…';
+      let count = 0;
+      for (const p of DFW_SEED_PRODUCTS){
+        try{
+          await setDoc(doc(db,'products',p.id), {
+            name:p.name, category:p.category, price:p.price, unit:p.unit,
+            badge:p.badge||'', description:p.description||'', stock:p.stock,
+            image:p.image, updatedAt:serverTimestamp(), createdAt:serverTimestamp()
+          });
+          count++;
+        }catch(e){}
+      }
+      await loadProducts();
+      renderProductTable();
+      btn.disabled=false; btn.textContent='🌱 Import 15 Starter Products';
+      toast('✓ Imported '+count+' starter products! Edit them in the Products tab.');
+    }
+  );
 });
 document.getElementById('importFile').addEventListener('change',e=>{
   const file=e.target.files[0];if(!file)return;
