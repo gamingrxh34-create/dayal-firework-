@@ -9,20 +9,26 @@
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#08080f;--panel:#111122;--panel-2:#181830;
-  --fire:#ff5500;--fire-soft:#ff7733;--crimson:#cc1530;
-  --spark:#f5c518;--spark-soft:#f8d84c;--ember:#e07600;--green:#00c853;
-  --text:#f2ede4;--muted:#7a82aa;--line:rgba(245,197,24,.14);--radius:14px;
+  --bg:#000000; --panel:#0d0d12; --panel-2:#15151c;
+  --fire:#ff6b35; --fire-soft:#ff8c5a;
+  --crimson:#e63946; --spark:#ffd700; --spark-soft:#ffe566;
+  --ember:#ff9500; --green:#06d6a0;
+  --text:#f8f4ee; --muted:#8b94af; --line:rgba(255,255,255,.08);
+  --radius:14px;
 }
 *{box-sizing:border-box;}html{scroll-behavior:smooth;}
 body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh;}
 h1,h2,.display{font-family:'Anton',sans-serif;font-weight:400;letter-spacing:.5px;text-transform:uppercase;}
 .mono{font-family:'JetBrains Mono',monospace;} a{color:inherit;} button{font-family:inherit;cursor:pointer;}
 
-.sky{position:fixed;inset:0;z-index:-2;background:radial-gradient(ellipse at 20% 0%,rgba(255,107,26,.15),transparent 50%),var(--bg);}
+.sky{position:fixed;inset:0;z-index:-2;background:radial-gradient(circle at 15% 15%,rgba(212,175,55,0.08),transparent 50%),radial-gradient(circle at 85% 85%,rgba(227,38,54,0.06),transparent 50%),var(--bg);}
 
 /* Header */
-header{position:sticky;top:0;z-index:40;background:rgba(7,7,14,.9);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);}
+header{
+  position:sticky; top:12px; z-index:40; margin:0 16px; border-radius:24px;
+  background:rgba(26,26,32,0.65); backdrop-filter:blur(24px) saturate(180%); -webkit-backdrop-filter:blur(24px) saturate(180%);
+  border:1px solid rgba(212,175,55,0.15); box-shadow:0 16px 40px rgba(0,0,0,0.5); transition:all 0.3s;
+}
 .header-inner{max-width:1100px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
 .brand{display:flex;align-items:center;gap:10px;text-decoration:none;}
 .brand-badge{width:40px;height:40px;border-radius:50%;flex-shrink:0;background:conic-gradient(from 180deg,var(--crimson),var(--spark),var(--fire),var(--crimson));display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 0 14px rgba(255,107,26,.5);}
@@ -69,8 +75,13 @@ header{position:sticky;top:0;z-index:40;background:rgba(7,7,14,.9);backdrop-filt
 .shop-btn{background:linear-gradient(135deg,var(--fire),var(--crimson));color:#fff;border:none;padding:13px 24px;border-radius:10px;font-weight:700;font-size:14px;text-decoration:none;display:inline-flex;align-items:center;gap:8px;}
 
 /* Order card */
-.order-card{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:18px;transition:border-color .2s;}
-.order-card:hover{border-color:rgba(245,197,24,.3);}
+.order-card{
+  background:linear-gradient(145deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  border:1px solid rgba(255,255,255,0.06); border-radius:20px;
+  overflow:hidden;margin-bottom:18px;transition:transform .3s, box-shadow .3s, border-color .3s;
+  backdrop-filter:blur(10px);
+}
+.order-card:hover{transform:translateY(-4px);border-color:rgba(212,175,55,0.4);box-shadow:0 12px 40px rgba(212,175,55,0.15);}
 .order-card-header{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.02);}
 .order-id-line{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 .order-id{font-family:'JetBrains Mono';font-size:13px;font-weight:700;color:var(--spark);}
@@ -115,6 +126,7 @@ header{position:sticky;top:0;z-index:40;background:rgba(7,7,14,.9);backdrop-filt
 .whatsapp-contact{display:inline-flex;align-items:center;gap:6px;background:#25D366;color:#04210f;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;border:none;cursor:pointer;}
 
 @media(max-width:520px){
+  header { margin:0; border-radius:0; border-left:none; border-right:none; border-top:none; }
   .order-card-header{flex-direction:column;align-items:flex-start;}
   .bill-rate{display:none;}
   .bill-table thead th:nth-child(3){display:none;}
@@ -284,7 +296,7 @@ function orderCardHTML(o){
 
   // Bill table
   const billRows=items.map(it=>`<tr>
-    <td><div class="bill-item-name">${it.name}</div><div class="bill-item-unit">${it.unit}</div></td>
+    <td><div class="bill-item-name">${dfw_escapeHTML(it.name)}</div><div class="bill-item-unit">${dfw_escapeHTML(it.unit)}</div></td>
     <td class="bill-qty">${it.qty}</td>
     <td class="bill-rate">${dfw_formatINR(it.price)}</td>
     <td class="bill-amount">${dfw_formatINR(it.price*it.qty)}</td>
@@ -305,16 +317,14 @@ function orderCardHTML(o){
       <div>
         <div class="order-id-line">
           <span class="order-id">${o.orderId||o._docId}</span>
-          <span class="status-badge" style="background:${bg};color:${color};">
-            <span class="status-dot" style="background:${color};"></span>${o.status||'New'}
-          </span>
+          <span class="status-badge" style="color:${color};background:${bg}"><span class="status-dot" style="background:${color}"></span>${dfw_escapeHTML(o.status||'New')}</span>
         </div>
         <div class="order-date">📅 ${date}${o.customerName?'  ·  👤 '+o.customerName:''}</div>
       </div>
       <div class="order-total-line">${dfw_formatINR(o.total||0)}</div>
     </div>
     <div class="order-card-body">
-      ${o.note?`<div class="bill-note">📝 ${o.note}</div>`:''}
+      ${o.note?`<div class="bill-note">Note: ${dfw_escapeHTML(o.note)}</div>`:''}
       <table class="bill-table">
         <thead><tr>
           <th>Product</th><th style="text-align:center;">Qty</th><th style="text-align:right;">Rate</th><th style="text-align:right;">Amount</th>

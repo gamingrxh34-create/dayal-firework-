@@ -9,20 +9,20 @@
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#08080f;
-    --panel:#111122;
-    --panel-2:#181830;
-    --fire:#ff5500;
-    --fire-soft:#ff7733;
-    --crimson:#cc1530;
-    --spark:#f5c518;
-    --spark-soft:#f8d84c;
-    --ember:#e07600;
-    --green:#00c853;
-    --text:#f2ede4;
-    --muted:#7a82aa;
-    --line:rgba(245,197,24,.14);
-    --glow:rgba(255,85,0,.28);
+    --bg:#000000;
+    --panel:#0d0d12;
+    --panel-2:#15151c;
+    --fire:#ff6b35;
+    --fire-soft:#ff8c5a;
+    --crimson:#e63946;
+    --spark:#ffd700;
+    --spark-soft:#ffe566;
+    --ember:#ff9500;
+    --green:#06d6a0;
+    --text:#f8f4ee;
+    --muted:#8b94af;
+    --line:rgba(255,255,255,.08);
+    --glow:rgba(255,107,53,.3);
     --radius:14px;
   }
   *{box-sizing:border-box;}
@@ -35,22 +35,14 @@
   button{font-family:inherit;cursor:pointer;}
 
   /* ── Background ── */
-  .sky{position:fixed; inset:0; z-index:-2; background:var(--bg);}
+  .sky{position:fixed;inset:0;z-index:-2;background:radial-gradient(circle at 15% 15%,rgba(212,175,55,0.08),transparent 50%),radial-gradient(circle at 85% 85%,rgba(227,38,54,0.06),transparent 50%),var(--bg);}
   .sky-gradient{position:fixed; inset:0; z-index:-2;}
-  .particles{position:fixed; inset:0; z-index:-1; overflow:hidden; pointer-events:none;}
-  .particles span{position:absolute; border-radius:50%; animation:emberFloat linear infinite;}
-  @keyframes emberFloat{
-    0%{opacity:0;transform:translateY(0) scale(1);}
-    15%{opacity:1;}
-    85%{opacity:0.6;}
-    100%{opacity:0;transform:translateY(-120vh) scale(0.3);}
-  }
 
   /* ── Header ── */
   header{
-    position:sticky; top:0; z-index:40;
-    background:rgba(7,7,14,0.88); backdrop-filter:blur(12px);
-    border-bottom:1px solid var(--line);
+    position:sticky; top:12px; z-index:40; margin:0 16px; border-radius:24px;
+    background:rgba(26,26,32,0.65); backdrop-filter:blur(24px) saturate(180%); -webkit-backdrop-filter:blur(24px) saturate(180%);
+    border:1px solid rgba(212,175,55,0.15); box-shadow:0 16px 40px rgba(0,0,0,0.5); transition:all 0.3s;
   }
   .header-inner{
     max-width:1200px; margin:0 auto; padding:14px 20px;
@@ -85,9 +77,10 @@
 
   /* ── Category Hero ── */
   .cat-hero{
-    position:relative; overflow:hidden;
-    min-height:260px; display:flex; align-items:flex-end;
-    padding:40px 20px 36px;
+    position:relative; overflow:hidden; border-radius:24px;
+    min-height:280px; display:flex; align-items:flex-end;
+    padding:40px 30px 36px; margin:24px 20px 0; max-width:1160px; margin-left:auto; margin-right:auto;
+    border:1px solid rgba(212,175,55,0.25); box-shadow:0 12px 50px rgba(212,175,55,0.12);
   }
   .cat-hero-bg{
     position:absolute; inset:0; z-index:0;
@@ -139,13 +132,15 @@
 
   /* ── Product Grid ── */
   .product-section{max-width:1200px; margin:0 auto; padding:0 20px 80px;}
-  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:16px;}
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(225px,1fr)); gap:20px;}
   .card{
-    background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
-    overflow:hidden; display:flex; flex-direction:column; position:relative;
-    transition:transform .2s ease, box-shadow .2s ease, border-color .2s;
+    background:linear-gradient(145deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+    border:1px solid rgba(255,255,255,0.06); border-radius:20px; overflow:hidden;
+    display:flex;flex-direction:column;position:relative;
+    transition:transform .3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow .3s, border-color .3s;
+    backdrop-filter:blur(10px);
   }
-  .card:hover{transform:translateY(-5px); border-color:rgba(255,107,26,0.5); box-shadow:0 12px 40px rgba(255,107,26,0.2);}
+  .card:hover{transform:translateY(-6px); border-color:rgba(212,175,55,0.5); box-shadow:0 16px 50px rgba(212,175,55,0.15);}
   .card .badge{
     position:absolute; top:10px; left:10px; background:var(--crimson); color:#fff;
     font-size:10px; font-weight:800; padding:4px 9px; border-radius:99px;
@@ -273,7 +268,8 @@
   .search-count{font-size:12px;color:var(--muted);margin-top:6px;padding-left:2px;}
 
   @media(max-width:640px){
-    .cat-hero{min-height:160px; padding:24px 16px 20px;}
+    header { margin:0; border-radius:0; border-left:none; border-right:none; border-top:none; }
+    .cat-hero{min-height:180px; padding:24px 16px 20px; margin:16px 16px 0; border-radius:16px;}
     .cat-hero-icon{font-size:32px; margin-bottom:8px;}
     .cat-hero-title{font-size:28px;}
     .cat-hero-sub{font-size:13px;}
@@ -281,13 +277,21 @@
     .filter-bar{flex-direction:column; align-items:flex-start; gap:8px; padding:10px 16px;}
     .filter-bar-right{flex-wrap:wrap; gap:6px;}
     .filter-chip{font-size:11px; padding:5px 10px;}
-    .grid{grid-template-columns:repeat(2,1fr); gap:10px;}
-    .card-body{padding:10px 10px 12px;}
-    .card-body h3{font-size:12px;}
-    .price{font-size:14px;}
-    .qty-stepper button{width:24px;height:24px;font-size:13px;}
-    .qty-stepper span{width:24px;font-size:12px;}
-    .add-btn{font-size:12px;padding:8px;}
+    
+    /* Compact List-View for products on mobile */
+    .grid{grid-template-columns:1fr;gap:12px;}
+    .card{flex-direction:row; align-items:stretch; padding-right:12px;}
+    .card .thumb{width:110px; flex-shrink:0; border-right:1px solid rgba(255,255,255,0.05);}
+    .card .thumb::after{display:none;}
+    .card-body{padding:12px; justify-content:center; flex:1;}
+    .card-body h3{font-size:13px; margin-bottom:4px;}
+    .card-body .desc{display:none;}
+    .price-row{padding-top:8px;}
+    
+    .qty-stepper button{width:26px;height:26px;}
+    .qty-stepper span{width:26px;font-size:12px;}
+    .add-btn{font-size:12px;padding:8px;width:auto;min-width:90px;margin-top:6px;}
+    
     .brand-text .display{font-size:16px;}
     .phone-pill{display:none;}
     .header-inner{padding:10px 14px;}
@@ -413,27 +417,18 @@
   let showInStockOnly = false;
   let sortMode        = 'default';
 
-  // Category gradient palette
-  const CAT_THEMES = {
-    'Sparklers':        { bg:'linear-gradient(135deg,#1a0a00,#2a1500,#1a0a00)', overlay:'linear-gradient(to top, rgba(7,7,14,0.9), rgba(255,140,0,0.15), transparent)' },
-    'Ground Chakras':   { bg:'linear-gradient(135deg,#0f0020,#1a0035,#0f0020)', overlay:'linear-gradient(to top, rgba(7,7,14,0.9), rgba(150,50,255,0.1), transparent)' },
-    'Flower Pots':      { bg:'linear-gradient(135deg,#200008,#350010,#200008)', overlay:'linear-gradient(to top, rgba(7,7,14,0.9), rgba(224,26,46,0.2), transparent)' },
-    'Rockets':          { bg:'linear-gradient(135deg,#001020,#001a35,#001020)', overlay:'linear-gradient(to top, rgba(7,7,14,0.9), rgba(30,100,200,0.15), transparent)' },
-    'Sound Crackers':   { bg:'linear-gradient(135deg,#200500,#350800,#200500)', overlay:'linear-gradient(to top, rgba(7,7,14,0.9), rgba(255,80,0,0.2), transparent)' },
-    'Fancy & Fountains':{ bg:'linear-gradient(135deg,#10001a,#1a001a,#10001a)', overlay:'linear-gradient(to top, rgba(7,7,14,0.9), rgba(200,50,200,0.15), transparent)' },
-    'Gift Boxes':       { bg:'linear-gradient(135deg,#1a1000,#2a1800,#1a1000)', overlay:'linear-gradient(to top, rgba(7,7,14,0.9), rgba(255,200,0,0.18), transparent)' },
-    'Green Crackers':   { bg:'linear-gradient(135deg,#001a08,#002a10,#001a08)', overlay:'linear-gradient(to top, rgba(7,7,14,0.9), rgba(45,186,106,0.2), transparent)' },
+  // Category themes disabled for a more premium, cohesive slate background
+  const theme = {
+    bg: 'transparent',
+    overlay: 'linear-gradient(to top, var(--bg), transparent)'
   };
 
-  const theme = CAT_THEMES[catName] || {
-    bg:'linear-gradient(135deg,#0f0000,#1a0800)',
-    overlay:'linear-gradient(to top, rgba(7,7,14,0.9), rgba(255,107,26,0.15), transparent)'
-  };
-
-  // Apply hero gradient
+  // Apply hero overlay gradient to fade smoothly into background
   document.getElementById('catHeroBg').style.background = theme.bg;
   document.getElementById('catHeroOverlay').style.background = theme.overlay;
-  document.getElementById('skyGradient').style.background = theme.bg;
+  if(document.getElementById('skyGradient')) {
+    document.getElementById('skyGradient').style.background = 'transparent';
+  }
 
   // ── Page title and meta ──
   document.title = (catName || 'Products') + ' — M/S Dayal Fire Works';
@@ -446,23 +441,9 @@
     document.getElementById('brandBadge').innerHTML = `<img src="${settings.logoImage}" alt="logo">`;
   }
 
-  // ── Ember particles ──
+  // ── Ember particles disabled for clean slate theme ──
   const particlesEl = document.getElementById('particles');
-  const emberColors = ['#ffd700','#ff9500','#ff6b1a','#e01a2e','#ffe566','#ffb347'];
-  for (let i = 0; i < 50; i++){
-    const s = document.createElement('span');
-    const size = Math.random() * 2.5 + 0.5;
-    s.style.cssText = `
-      left:${Math.random()*100}%;
-      bottom:${Math.random()*20}%;
-      width:${size}px; height:${size}px;
-      background:${emberColors[Math.floor(Math.random()*emberColors.length)]};
-      box-shadow:0 0 ${size*3}px ${emberColors[Math.floor(Math.random()*emberColors.length)]};
-      animation-delay:${Math.random()*6}s;
-      animation-duration:${Math.random()*5+4}s;
-    `;
-    particlesEl.appendChild(s);
-  }
+  if(particlesEl) particlesEl.style.display = 'none';
 
   // ── Try to load fresh from Firebase ──
   (async () => {
@@ -487,8 +468,8 @@
     const inStock     = catProducts.filter(p => p.stock).length;
 
     document.getElementById('catHeroIcon').textContent  = dfw_categoryIcon(catName);
-    document.getElementById('catHeroTitle').textContent = catName || 'All Products';
-    document.getElementById('breadcrumbCat').textContent = catName;
+    document.getElementById('catHeroTitle').textContent = dfw_escapeHTML(catName) || 'All Products';
+    document.getElementById('breadcrumbCat').textContent = dfw_escapeHTML(catName);
     document.getElementById('catHeroSub').textContent   =
       `${catProducts.length} product${catProducts.length!==1?'s':''} available at wholesale prices`;
 
@@ -496,14 +477,14 @@
       <div class="cat-stat">🛒 ${catProducts.length} Products</div>
       <div class="cat-stat">✅ ${inStock} In Stock</div>
     `;
-    document.getElementById('filterBarTitle').textContent = catName + ' — ' + catProducts.length + ' Products';
+    document.getElementById('filterBarTitle').textContent = dfw_escapeHTML(catName) + ' — ' + catProducts.length + ' Products';
   }
 
   // ── Render products ──
   function getVisibleProducts(){
     const searchQ = (document.getElementById('catSearch')||{value:''}).value.trim().toLowerCase();
     let list = products.filter(p => p.category === catName);
-    if (showInStockOnly) list = list.filter(p => p.stock);
+    if (showInStockOnly) list = list.filter(p => p.quantity > 0);
     if (searchQ) list = list.filter(p => p.name.toLowerCase().includes(searchQ) || (p.description||'').toLowerCase().includes(searchQ));
     if (sortMode === 'price-asc')  list = [...list].sort((a,b)=>a.price-b.price);
     if (sortMode === 'price-desc') list = [...list].sort((a,b)=>b.price-a.price);
@@ -519,7 +500,7 @@
     if(countEl) countEl.textContent = searchQ ? `Showing ${list.length} result${list.length!==1?'s':''} for "${searchQ}"` : '';
 
     if (list.length === 0){
-      grid.innerHTML = `<div class="no-results" style="grid-column:1/-1;">${searchQ?'🔍 No products matching "'+searchQ+'" in this category.':'😔 No products found in this category.'}</div>`;
+      grid.innerHTML = `<div class="no-results" style="grid-column:1/-1;">${searchQ?'🔍 No products matching "'+dfw_escapeHTML(searchQ)+'" in this category.':'😔 No products found in this category.'}</div>`;
       return;
     }
 
@@ -528,13 +509,13 @@
       const isGreen = p.badge && p.badge.toLowerCase().includes('green');
       return `
         <div class="card">
-          ${p.badge ? `<span class="badge ${isGreen?'green':''}">${p.badge}</span>` : ''}
-          ${!p.stock ? `<span class="out-badge">Out of stock</span>` : ''}
-          <div class="thumb"><img src="${p.image}" alt="${p.name}" loading="lazy"></div>
+          ${p.badge ? `<span class="badge ${isGreen?'green':''}">${dfw_escapeHTML(p.badge)}</span>` : ''}
+          ${!(p.quantity>0) ? `<span class="out-badge">Out of stock</span>` : ''}
+          <div class="thumb"><img src="${dfw_escapeHTML(p.image)}" alt="${dfw_escapeHTML(p.name)}" loading="lazy" onerror="this.src=dfw_placeholderImage('🎆','#1a2340')"></div>
           <div class="card-body">
-            <h3>${p.name}</h3>
-            <div class="unit">${p.unit}</div>
-            ${p.description ? `<div class="desc">${p.description}</div>` : ''}
+            <h3>${dfw_escapeHTML(p.name)}</h3>
+            <div class="unit">${dfw_escapeHTML(p.unit)}</div>
+            ${p.description ? `<div class="desc">${dfw_escapeHTML(p.description)}</div>` : ''}
             <div class="price-row">
               <span class="price">${dfw_formatINR(p.price)}</span>
               <div class="qty-stepper">
@@ -543,14 +524,16 @@
                 <button data-inc="${p.id}">+</button>
               </div>
             </div>
-            <button class="add-btn" data-add="${p.id}" ${!p.stock?'disabled':''}>${p.stock?'Add to Cart':'Unavailable'}</button>
+            <button class="add-btn" data-add="${p.id}" ${!(p.quantity>0)?'disabled style="opacity:0.5;cursor:not-allowed;"':''}>
+              ${qty>0?'Add More':'Add to Cart'}
+            </button>
           </div>
         </div>
       `;
     }).join('');
 
-    grid.querySelectorAll('[data-inc]').forEach(b=>b.addEventListener('click',()=>changeQty(b.dataset.inc, 1)));
-    grid.querySelectorAll('[data-dec]').forEach(b=>b.addEventListener('click',()=>changeQty(b.dataset.dec,-1)));
+    grid.querySelectorAll('[data-inc]').forEach(b=>b.addEventListener('click',()=>incQty(b.dataset.inc)));
+    grid.querySelectorAll('[data-dec]').forEach(b=>b.addEventListener('click',()=>decQty(b.dataset.dec)));
     grid.querySelectorAll('[data-add]').forEach(b=>b.addEventListener('click',()=>addToCart(b.dataset.add)));
   }
 
@@ -560,7 +543,7 @@
     const strip   = document.getElementById('catsStrip');
     strip.innerHTML = allCats.map(cat =>
       `<a href="category.html?cat=${encodeURIComponent(cat)}" class="cat-chip">
-        ${dfw_categoryIcon(cat)} ${cat}
+        ${dfw_categoryIcon(cat)} ${dfw_escapeHTML(cat)}
       </a>`
     ).join('');
     if (allCats.length === 0) document.getElementById('otherCatsSection').style.display = 'none';
@@ -574,27 +557,26 @@
   renderAll();
 
   // ── Qty controls ──
-  function changeQty(id, delta){
-    const el = document.getElementById('qty-'+id);
-    if (!el) return;
-    el.textContent = Math.max(0, Math.min(99, parseInt(el.textContent,10) + delta));
+  function incQty(id){
+    const p=products.find(x=>x.id===id);
+    if(!p || !(p.quantity>0)) return;
+    if(!cart[id]) cart[id]={qty:0, name:p.name, price:p.price, unit:p.unit, image:p.image};
+    cart[id].qty = Math.min(9999, cart[id].qty + 1);
+    updateCart();
   }
+  function decQty(id){
+    if(!cart[id])return;
+    cart[id].qty = Math.max(0, cart[id].qty - 1);
+    if(cart[id].qty<=0) delete cart[id];
+    updateCart();
+  }
+  function updateCart(){ dfw_saveCart(cart); renderDrawer(); renderProducts(); updateCartCount(); }
 
   // ── Add to cart ──
   function addToCart(id){
-    const el  = document.getElementById('qty-'+id);
-    let qty = el ? parseInt(el.textContent, 10) : 1;
-    if (qty < 1) qty = 1;
-    const p = products.find(x=>x.id===id);
-    if (!p || !p.stock) return;
-    if (!cart[id]) cart[id] = { id, name:p.name, unit:p.unit, price:p.price, image:p.image, qty:0 };
-    cart[id].qty += qty;
-    dfw_saveCart(cart);
-    updateCartCount();
-    if (el) el.textContent = 0;
+    incQty(id);
     const btn = document.querySelector(`[data-add="${id}"]`);
-    if (btn){ btn.textContent = 'Added ✓'; btn.classList.add('added'); setTimeout(()=>{ btn.textContent='Add to Cart'; btn.classList.remove('added'); }, 900); }
-    renderDrawer();
+    if (btn){ btn.textContent = 'Added ✓'; btn.classList.add('added'); setTimeout(()=>{ btn.textContent='Add More'; btn.classList.remove('added'); }, 900); }
   }
 
   function updateCartCount(){
@@ -646,10 +628,10 @@
     }
     body.innerHTML = items.map(i=>`
       <div class="cart-item">
-        <img src="${i.image}" alt="${i.name}">
+        <img src="${dfw_escapeHTML(i.image)}" alt="${dfw_escapeHTML(i.name)}">
         <div class="ci-info">
-          <h4>${i.name}</h4>
-          <div class="unit">${i.unit} · ${dfw_formatINR(i.price)}</div>
+          <h4>${dfw_escapeHTML(i.name)}</h4>
+          <div class="unit">${dfw_escapeHTML(i.unit)} · ${dfw_formatINR(i.price)}</div>
           <div class="ci-actions">
             <div class="qty-stepper">
               <button data-cdec="${i.id}">−</button>
@@ -673,14 +655,10 @@
       <div class="subtotal-row"><span>Subtotal</span><span class="price">${dfw_formatINR(cartTotal())}</span></div>
       <button class="whatsapp-btn" id="sendOrderBtn">📩 Send Order on WhatsApp</button>
     `;
-    body.querySelectorAll('[data-cinc]').forEach(b=>b.addEventListener('click',()=>{ cart[b.dataset.cinc].qty++; dfw_saveCart(cart); renderDrawer(); }));
-    body.querySelectorAll('[data-cdec]').forEach(b=>b.addEventListener('click',()=>{
-      const id=b.dataset.cdec; cart[id].qty--;
-      if(cart[id].qty<=0) delete cart[id];
-      dfw_saveCart(cart); renderDrawer(); renderProducts();
-    }));
+    body.querySelectorAll('[data-cinc]').forEach(b=>b.addEventListener('click',()=>incQty(b.dataset.cinc)));
+    body.querySelectorAll('[data-cdec]').forEach(b=>b.addEventListener('click',()=>decQty(b.dataset.cdec)));
     body.querySelectorAll('[data-remove]').forEach(b=>b.addEventListener('click',()=>{
-      delete cart[b.dataset.remove]; dfw_saveCart(cart); renderDrawer(); renderProducts();
+      delete cart[b.dataset.remove]; updateCart();
     }));
     document.getElementById('sendOrderBtn').addEventListener('click', sendOrder);
     updateCartCount();
@@ -703,7 +681,7 @@
 
     const items   = Object.values(cart);
     const total   = cartTotal();
-    const orderId = 'DFW-' + Date.now().toString().slice(-8);
+    const orderId = dfw_generateOrderId();
 
     // Save to Firestore
     try {

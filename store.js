@@ -26,6 +26,26 @@ const DFW_CATEGORIES = [
   'Sound Crackers','Fancy & Fountains','Gift Boxes','Green Crackers'
 ];
 
+// ── Security & Utils ───────────────────────────────────────────
+function dfw_escapeHTML(str){
+  if(typeof str !== 'string') return str;
+  return str.replace(/[&<>'"]/g, tag => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+  }[tag]));
+}
+function dfw_generateOrderId(){
+  const d = new Date();
+  const dateStr = [
+    String(d.getDate()).padStart(2,'0'),
+    String(d.getMonth()+1).padStart(2,'0'),
+    String(d.getFullYear()).slice(-2)
+  ].join('');
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let rand = '';
+  for(let i=0; i<5; i++) rand += chars.charAt(Math.floor(Math.random()*chars.length));
+  return `DFW-${dateStr}-${rand}`;
+}
+
 // ── Placeholder image (emoji on dark bg) ─────────────────────
 function dfw_placeholderImage(emoji, bg){
   const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'>
@@ -37,21 +57,21 @@ function dfw_placeholderImage(emoji, bg){
 
 // ── Seed products (shown when Firestore is empty) ─────────────
 const DFW_SEED_PRODUCTS = [
-  { id:'p1',  name:'Colour Sparklers (10 cm)',        category:'Sparklers',        price:40,   unit:'per box (10 pcs)', stock:true, badge:'Bestseller',   image:dfw_placeholderImage('✨','#1a2340'), description:'Bright multi-colour hand sparklers.' },
-  { id:'p2',  name:'Electric Sparklers (15 cm)',       category:'Sparklers',        price:60,   unit:'per box (10 pcs)', stock:true, badge:'',             image:dfw_placeholderImage('✨','#1a2340'), description:'Longer-burning silver sparklers.' },
-  { id:'p3',  name:'Dhanak Chakkar (Ground Spinner)',  category:'Ground Chakras',   price:25,   unit:'per piece',        stock:true, badge:'',             image:dfw_placeholderImage('🌀','#241a40'), description:'Classic spinning ground chakra.' },
-  { id:'p4',  name:'Deluxe Chakri (Large)',            category:'Ground Chakras',   price:90,   unit:'per piece',        stock:true, badge:'',             image:dfw_placeholderImage('🌀','#241a40'), description:'Bigger, longer-spinning chakra.' },
-  { id:'p5',  name:'Flower Pot (Anar) — Small',        category:'Flower Pots',      price:35,   unit:'per piece',        stock:true, badge:'',             image:dfw_placeholderImage('🌺','#40241a'), description:'Compact fountain of sparks.' },
-  { id:'p6',  name:'Flower Pot (Anar) — Jumbo',        category:'Flower Pots',      price:150,  unit:'per piece',        stock:true, badge:'Popular',      image:dfw_placeholderImage('🌺','#40241a'), description:'Tall jumbo fountain, long burn time.' },
-  { id:'p7',  name:'10-Shot Sky Rocket',               category:'Rockets',          price:120,  unit:'per piece',        stock:true, badge:'',             image:dfw_placeholderImage('🚀','#1a4030'), description:'Rises high and bursts into colour.' },
-  { id:'p8',  name:'Whistling Rocket (Pack of 5)',     category:'Rockets',          price:100,  unit:'per pack',         stock:true, badge:'',             image:dfw_placeholderImage('🚀','#1a4030'), description:'Whistling ascent, colourful burst.' },
-  { id:'p9',  name:'Lakshmi Bomb (Sound Cracker)',     category:'Sound Crackers',   price:150,  unit:'per box (10 pcs)', stock:true, badge:'',             image:dfw_placeholderImage('💥','#402a1a'), description:'Traditional loud-report cracker.' },
-  { id:'p10', name:'Garland Chain — 50 wala',          category:'Sound Crackers',   price:180,  unit:'per chain',        stock:true, badge:'',             image:dfw_placeholderImage('🧨','#402a1a'), description:'Continuous garland of small crackers.' },
-  { id:'p11', name:'Rangoli Fountain Assortment',      category:'Fancy & Fountains',price:220,  unit:'per box',          stock:true, badge:'New',          image:dfw_placeholderImage('🎆','#301a40'), description:'Mixed fountain pack, varied effects.' },
-  { id:'p12', name:'Family Gift Box — Celebration',    category:'Gift Boxes',       price:999,  unit:'per box',          stock:true, badge:'Value Pack',   image:dfw_placeholderImage('🎁','#401a1a'), description:'Sparklers, chakras, anars & rockets.' },
-  { id:'p13', name:'Grand Gift Box — Premium Pack',    category:'Gift Boxes',       price:2499, unit:'per box',          stock:true, badge:'Premium',      image:dfw_placeholderImage('🎁','#401a1a'), description:'Our largest, most premium assortment.' },
-  { id:'p14', name:'Green Sparklers (Eco-friendly)',   category:'Green Crackers',   price:50,   unit:'per box (10 pcs)', stock:true, badge:'Green Cracker',image:dfw_placeholderImage('🌿','#1a4023'), description:'PESO-approved, reduced emissions.' },
-  { id:'p15', name:'Green Flower Pot',                 category:'Green Crackers',   price:60,   unit:'per piece',        stock:true, badge:'Green Cracker',image:dfw_placeholderImage('🌿','#1a4023'), description:'Eco-friendly anar, less smoke.' }
+  { id:'p1',  name:'Colour Sparklers (10 cm)',        category:'Sparklers',        price:40,   unit:'per box (10 pcs)', quantity:100, badge:'Bestseller',   image:dfw_placeholderImage('✨','#1a2340'), description:'Bright multi-colour hand sparklers.' },
+  { id:'p2',  name:'Electric Sparklers (15 cm)',       category:'Sparklers',        price:60,   unit:'per box (10 pcs)', quantity:100, badge:'',             image:dfw_placeholderImage('✨','#1a2340'), description:'Longer-burning silver sparklers.' },
+  { id:'p3',  name:'Dhanak Chakkar (Ground Spinner)',  category:'Ground Chakras',   price:25,   unit:'per piece',        quantity:100, badge:'',             image:dfw_placeholderImage('🌀','#241a40'), description:'Classic spinning ground chakra.' },
+  { id:'p4',  name:'Deluxe Chakri (Large)',            category:'Ground Chakras',   price:90,   unit:'per piece',        quantity:50,  badge:'',             image:dfw_placeholderImage('🌀','#241a40'), description:'Bigger, longer-spinning chakra.' },
+  { id:'p5',  name:'Flower Pot (Anar) — Small',        category:'Flower Pots',      price:35,   unit:'per piece',        quantity:100, badge:'',             image:dfw_placeholderImage('🌺','#40241a'), description:'Compact fountain of sparks.' },
+  { id:'p6',  name:'Flower Pot (Anar) — Jumbo',        category:'Flower Pots',      price:150,  unit:'per piece',        quantity:30,  badge:'Popular',      image:dfw_placeholderImage('🌺','#40241a'), description:'Tall jumbo fountain, long burn time.' },
+  { id:'p7',  name:'10-Shot Sky Rocket',               category:'Rockets',          price:120,  unit:'per piece',        quantity:50,  badge:'',             image:dfw_placeholderImage('🚀','#1a4030'), description:'Rises high and bursts into colour.' },
+  { id:'p8',  name:'Whistling Rocket (Pack of 5)',     category:'Rockets',          price:100,  unit:'per pack',         quantity:50,  badge:'',             image:dfw_placeholderImage('🚀','#1a4030'), description:'Whistling ascent, colourful burst.' },
+  { id:'p9',  name:'Lakshmi Bomb (Sound Cracker)',     category:'Sound Crackers',   price:150,  unit:'per box (10 pcs)', quantity:80,  badge:'',             image:dfw_placeholderImage('💥','#402a1a'), description:'Traditional loud-report cracker.' },
+  { id:'p10', name:'Garland Chain — 50 wala',          category:'Sound Crackers',   price:180,  unit:'per chain',        quantity:40,  badge:'',             image:dfw_placeholderImage('🧨','#402a1a'), description:'Continuous garland of small crackers.' },
+  { id:'p11', name:'Rangoli Fountain Assortment',      category:'Fancy & Fountains',price:220,  unit:'per box',          quantity:20,  badge:'New',          image:dfw_placeholderImage('🎆','#301a40'), description:'Mixed fountain pack, varied effects.' },
+  { id:'p12', name:'Family Gift Box — Celebration',    category:'Gift Boxes',       price:999,  unit:'per box',          quantity:10,  badge:'Value Pack',   image:dfw_placeholderImage('🎁','#401a1a'), description:'Sparklers, chakras, anars & rockets.' },
+  { id:'p13', name:'Grand Gift Box — Premium Pack',    category:'Gift Boxes',       price:2499, unit:'per box',          quantity:5,   badge:'Premium',      image:dfw_placeholderImage('🎁','#401a1a'), description:'Our largest, most premium assortment.' },
+  { id:'p14', name:'Green Sparklers (Eco-friendly)',   category:'Green Crackers',   price:50,   unit:'per box (10 pcs)', quantity:100, badge:'Green Cracker',image:dfw_placeholderImage('🌿','#1a4023'), description:'PESO-approved, reduced emissions.' },
+  { id:'p15', name:'Green Flower Pot',                 category:'Green Crackers',   price:60,   unit:'per piece',        quantity:100, badge:'Green Cracker',image:dfw_placeholderImage('🌿','#1a4023'), description:'Eco-friendly anar, less smoke.' }
 ];
 
 // ── localStorage keys ────────────────────────────────────────

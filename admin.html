@@ -8,18 +8,20 @@
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#07070e;--panel:#0f0f1e;--panel-2:#151528;
-  --fire:#ff6b1a;--fire-soft:#ff9a4d;--crimson:#e01a2e;
-  --spark:#ffd700;--spark-soft:#ffe566;--ember:#ff8c00;--green:#2dba6a;
-  --text:#f5f0e8;--muted:#8b92b8;--line:rgba(255,107,26,.18);--radius:12px;
+  --bg:#000000; --panel:#0d0d12; --panel-2:#15151c;
+  --fire:#ff6b35; --fire-soft:#ff8c5a;
+  --crimson:#e63946; --spark:#ffd700; --spark-soft:#ffe566;
+  --ember:#ff9500; --green:#06d6a0;
+  --text:#f8f4ee; --muted:#8b94af; --line:rgba(255,255,255,.08);
+  --radius:12px;
 }
 *{box-sizing:border-box;} body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;}
 h1,h2,.display{font-family:'Anton',sans-serif;font-weight:400;letter-spacing:.4px;text-transform:uppercase;}
 .mono{font-family:'JetBrains Mono',monospace;} button{font-family:inherit;cursor:pointer;} input,textarea,select{font-family:inherit;}
 
 /* ── Auth Gate ── */
-.auth-gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(ellipse at 30% 0%,rgba(224,26,46,.15),transparent 50%),var(--bg);}
-.auth-card{background:var(--panel);border:1px solid var(--spark);border-radius:16px;padding:40px 32px;max-width:400px;width:100%;text-align:center;box-shadow:0 0 60px rgba(255,215,0,.1);}
+.auth-gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(circle at 15% 15%,rgba(212,175,55,0.08),transparent 50%),radial-gradient(circle at 85% 85%,rgba(227,38,54,0.06),transparent 50%),var(--bg);}
+.auth-card{background:linear-gradient(145deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));backdrop-filter:blur(24px);border:1px solid rgba(212,175,55,0.25);border-radius:24px;padding:40px 32px;max-width:400px;width:100%;text-align:center;box-shadow:0 12px 60px rgba(212,175,55,0.15);}
 .auth-card .icon{font-size:50px;margin-bottom:16px;}
 .auth-card h2{font-size:22px;color:var(--spark-soft);margin:0 0 10px;}
 .auth-card p{color:var(--muted);font-size:13.5px;line-height:1.6;margin:0 0 22px;}
@@ -30,7 +32,12 @@ h1,h2,.display{font-family:'Anton',sans-serif;font-weight:400;letter-spacing:.4p
 
 /* ── App Shell ── */
 #app{display:none;}
-header{border-bottom:1px solid var(--line);padding:14px 22px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:rgba(7,7,14,.92);backdrop-filter:blur(8px);z-index:20;}
+header{
+  position:sticky; top:12px; z-index:40; margin:0 16px; border-radius:24px;
+  background:rgba(26,26,32,0.65); backdrop-filter:blur(24px) saturate(180%); -webkit-backdrop-filter:blur(24px) saturate(180%);
+  border:1px solid rgba(212,175,55,0.15); box-shadow:0 16px 40px rgba(0,0,0,0.5); transition:all 0.3s;
+  padding:14px 22px;display:flex;align-items:center;justify-content:space-between;
+}
 header .display{font-size:17px;color:var(--spark-soft);}
 .header-right{display:flex;align-items:center;gap:10px;}
 .user-chip{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);}
@@ -45,7 +52,12 @@ header .display{font-size:17px;color:var(--spark-soft);}
 .tab{padding:8px 16px;border-radius:8px 8px 0 0;background:transparent;border:1px solid transparent;color:var(--muted);font-weight:600;font-size:13px;}
 .tab.active{background:var(--panel);border-color:var(--line);border-bottom-color:var(--panel);color:var(--spark-soft);}
 .content{max-width:1200px;margin:0 auto;padding:22px;}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px;}
+.panel{
+  background:linear-gradient(145deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,0.06);border-radius:20px;padding:24px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.3);
+}
 .panel+.panel{margin-top:18px;}
 .toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
 .toolbar h2{font-size:15px;margin:0;color:var(--spark-soft);}
@@ -53,7 +65,10 @@ header .display{font-size:17px;color:var(--spark-soft);}
 
 /* ── Stats ── */
 .stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px;}
-.stat-card{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:14px;text-align:center;}
+.stat-card{
+  background:linear-gradient(145deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:16px;text-align:center;
+}
 .stat-num{font-family:'JetBrains Mono';font-size:24px;font-weight:700;color:var(--spark-soft);}
 .stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:3px;}
 
@@ -150,6 +165,7 @@ tr:last-child td{border-bottom:none;}
 
   <div class="tabs">
     <button class="tab active" data-tab="orders">📋 Orders</button>
+    <button class="tab" data-tab="sales">📈 Daily Sales</button>
     <button class="tab" data-tab="products">🛒 Products</button>
     <button class="tab" data-tab="settings">⚙️ Settings</button>
     <button class="tab" data-tab="backup">💾 Backup</button>
@@ -185,6 +201,18 @@ tr:last-child td{border-bottom:none;}
       </div>
     </div>
 
+    <!-- DAILY SALES -->
+    <div class="tab-panel" id="tab-sales" style="display:none;">
+      <div class="panel">
+        <div class="toolbar">
+          <h2>Daily Sales & Restock Report</h2>
+          <div style="font-size:13px;color:var(--muted);">Today's Confirmed Items</div>
+        </div>
+        <p style="color:var(--muted);font-size:13px;line-height:1.7;">This report aggregates all items from orders marked as <strong>Completed</strong> or <strong>Confirmed</strong> that were updated today. Use this to easily deduct inventory in bulk at the end of the day.</p>
+        <div style="overflow-x:auto;"><table id="salesTable"></table></div>
+      </div>
+    </div>
+
     <!-- PRODUCTS -->
     <div class="tab-panel" id="tab-products" style="display:none;">
       <div class="panel">
@@ -194,7 +222,11 @@ tr:last-child td{border-bottom:none;}
       <div class="panel">
         <div class="toolbar">
           <h2>All Products</h2>
-          <input type="text" class="search-input" id="searchInput" placeholder="Search products…">
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <select id="bulkCatDelete" class="search-input" style="padding:6px;width:auto;"><option value="">Select Category...</option></select>
+            <button class="btn btn-danger" id="btnDeleteCat" style="padding:6px 10px;font-size:12px;">Delete Category</button>
+            <input type="text" class="search-input" id="searchInput" placeholder="Search products…">
+          </div>
         </div>
         <div style="overflow-x:auto;"><table id="productTable"></table></div>
       </div>
@@ -322,9 +354,10 @@ async function loadSettings(){
 function subscribeOrders(){
   const q=query(collection(db,'orders'),orderBy('placedAt','desc'));
   unsubOrders=onSnapshot(q, snap=>{
-    allOrders=snap.docs.map(d=>({_docId:d.id,...d.data(),placedAt:d.data().placedAt?.toDate?.()}));
+    allOrders=snap.docs.map(d=>({_docId:d.id,...d.data(),placedAt:d.data().placedAt?.toDate?.(),updatedAt:d.data().updatedAt?.toDate?.()}));
     document.getElementById('ordersLoading').style.display='none';
     renderOrders();
+    renderDailySales();
   }, err=>{
     document.getElementById('ordersLoading').style.display='none';
     document.getElementById('ordersError').style.display='block';
@@ -365,10 +398,10 @@ function renderOrders(){
           <span class="order-id">${o.orderId||o._docId}</span>
           <span class="status-badge" style="background:${bg};color:${color};">${o.status||'New'}</span>
         </div>
-        <div class="order-customer">${o.customerName||'—'}</div>
-        <div class="order-meta">📞 ${o.customerPhone||'—'} &nbsp;·&nbsp; ${date} ${o.customerEmail?'&nbsp;·&nbsp; 📧 '+o.customerEmail:''}</div>
-        ${o.note?`<div class="order-meta" style="margin-top:3px;">📝 ${o.note}</div>`:''}
-        <ul class="items-mini">${items.map(i=>`<li><span>${i.name} ×${i.qty}</span><span>${dfw_formatINR(i.price*i.qty)}</span></li>`).join('')}</ul>
+        <div class="order-customer">${dfw_escapeHTML(o.customerName)||'—'}</div>
+        <div class="order-meta">📞 ${dfw_escapeHTML(o.customerPhone)||'—'} &nbsp;·&nbsp; ${date} ${o.customerEmail?'&nbsp;·&nbsp; 📧 '+dfw_escapeHTML(o.customerEmail):''}</div>
+        ${o.note?`<div class="order-meta" style="margin-top:3px;">📝 ${dfw_escapeHTML(o.note)}</div>`:''}
+        <ul class="items-mini">${items.map(i=>`<li><span>${dfw_escapeHTML(i.name)} ×${i.qty}</span><span>${dfw_formatINR(i.price*i.qty)}</span></li>`).join('')}</ul>
         <div class="order-total-badge">${dfw_formatINR(o.total||0)}</div>
       </div>
       <div class="order-actions-col">
@@ -396,6 +429,42 @@ function renderOrders(){
 }
 document.getElementById('orderFilter').addEventListener('change',renderOrders);
 document.getElementById('orderSearch').addEventListener('input',renderOrders);
+
+function renderDailySales(){
+  const today = new Date().toLocaleDateString();
+  const salesTable = document.getElementById('salesTable');
+  
+  // Filter for completed/confirmed orders updated today
+  const todaysOrders = allOrders.filter(o => 
+    (o.status === 'Completed' || o.status === 'Confirmed' || o.status === 'Delivered') &&
+    o.updatedAt && o.updatedAt.toLocaleDateString() === today
+  );
+
+  const aggregated = {};
+  todaysOrders.forEach(o => {
+    (o.items || []).forEach(it => {
+      if(!aggregated[it.id]) aggregated[it.id] = { name: it.name, qty: 0 };
+      aggregated[it.id].qty += it.qty;
+    });
+  });
+
+  const rows = Object.values(aggregated).sort((a,b)=>b.qty - a.qty);
+  
+  if (rows.length === 0){
+    salesTable.innerHTML = `<tr><td class="empty-state">No confirmed items today yet.</td></tr>`;
+    return;
+  }
+  
+  salesTable.innerHTML = `
+    <thead><tr><th style="text-align:left;">Product</th><th style="text-align:center;">Qty Sold Today</th></tr></thead>
+    <tbody>
+      ${rows.map(r => `<tr>
+        <td style="font-weight:600;">${dfw_escapeHTML(r.name)}</td>
+        <td style="text-align:center;font-size:18px;font-family:'JetBrains Mono';color:var(--spark);">${r.qty}</td>
+      </tr>`).join('')}
+    </tbody>
+  `;
+}
 
 function printBill(o){
   const s=dfw_getSettings();
@@ -487,7 +556,7 @@ function renderProductForm(product){
         </div>
       </div>
       <div class="field full"><label>Description (optional)</label><textarea id="f_desc">${product&&product.description?product.description:''}</textarea></div>
-      <div class="field full" style="display:flex;align-items:center;gap:8px;"><input type="checkbox" id="f_stock" ${!product||product.stock?'checked':''}><label for="f_stock" style="margin:0;">In stock</label></div>
+      <div class="field full"><label>Stock Quantity</label><input type="number" id="f_qty" min="0" step="1" value="${product&&product.quantity!==undefined?product.quantity:100}"></div>
       <div class="form-actions">
         ${product?'<button class="btn" id="f_cancel">Cancel</button>':''}
         <button class="btn btn-primary" id="f_save">${product?'Save Changes':'Add Product'}</button>
@@ -512,12 +581,12 @@ async function saveProduct(){
   const unit=document.getElementById('f_unit').value.trim()||'per piece';
   const badge=document.getElementById('f_badge').value.trim();
   const description=document.getElementById('f_desc').value.trim();
-  const stock=document.getElementById('f_stock').checked;
+  const quantity=parseInt(document.getElementById('f_qty').value,10)||0;
   if(!name||!category||isNaN(price)||price<0){toast('⚠ Please fill in name, category and price.',true);return;}
   const image=pendingImg||dfw_placeholderImage('🧨','#1b2338');
   const btn=document.getElementById('f_save'); btn.disabled=true; btn.textContent='Saving…';
   try{
-    const data={name,category,price,unit,badge,description,stock,image,updatedAt:serverTimestamp()};
+    const data={name,category,price,unit,badge,description,quantity,image,updatedAt:serverTimestamp()};
     if(editingId){
       await setDoc(doc(db,'products',editingId),data,{merge:true});
       const idx=products.findIndex(p=>p.id===editingId); if(idx>=0) products[idx]={id:editingId,...data};
@@ -540,10 +609,15 @@ function renderProductTable(filter){
   table.innerHTML=`<thead><tr><th></th><th>Product</th><th>Category</th><th>Price</th><th>Stock</th><th></th></tr></thead>
     <tbody>${list.map(p=>`<tr>
       <td><img class="prod-thumb" src="${p.image}"></td>
-      <td><div class="prod-name">${p.name} ${p.badge?`<span class="badge-tag">${p.badge}</span>`:''}</div><div class="prod-cat">${p.unit}</div></td>
-      <td class="prod-cat">${p.category}</td>
+      <td><div class="prod-name">${dfw_escapeHTML(p.name)} ${p.badge?`<span class="badge-tag">${dfw_escapeHTML(p.badge)}</span>`:''}</div><div class="prod-cat">${dfw_escapeHTML(p.unit)}</div></td>
+      <td class="prod-cat">${dfw_escapeHTML(p.category)}</td>
       <td class="mono">${dfw_formatINR(p.price)}</td>
-      <td><label class="stock-toggle"><input type="checkbox" data-stock="${p.id}" ${p.stock?'checked':''}> ${p.stock?'In stock':'Out of stock'}</label></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <input type="number" class="search-input" style="width:60px;padding:4px;" value="${p.quantity!==undefined?p.quantity:0}" data-stock-input="${p.id}">
+          <button class="btn btn-success" style="padding:4px 8px;font-size:11px;" data-save-stock="${p.id}">Save</button>
+        </div>
+      </td>
       <td><div class="row-actions">
         <button class="icon-btn" data-edit="${p.id}">Edit</button>
         <button class="icon-btn danger" data-delete="${p.id}">Delete</button>
@@ -556,14 +630,45 @@ function renderProductTable(filter){
       catch(e){toast('⚠ '+e.message,true);}
     });
   }));
-  table.querySelectorAll('[data-stock]').forEach(cb=>cb.addEventListener('change',async()=>{
-    const p=products.find(x=>x.id===cb.dataset.stock);if(!p)return;
-    p.stock=cb.checked;
-    try{await updateDoc(doc(db,'products',p.id),{stock:p.stock});renderProductTable(document.getElementById('searchInput').value);}
-    catch(e){toast('⚠ '+e.message,true);}
+  table.querySelectorAll('[data-save-stock]').forEach(btn=>btn.addEventListener('click',async()=>{
+    const p=products.find(x=>x.id===btn.dataset.saveStock);if(!p)return;
+    const input=document.querySelector(`input[data-stock-input="${p.id}"]`);
+    if(!input)return;
+    const newQty = parseInt(input.value,10)||0;
+    p.quantity=newQty;
+    btn.textContent='...';
+    try{await updateDoc(doc(db,'products',p.id),{quantity:p.quantity});btn.textContent='✓';setTimeout(()=>btn.textContent='Save',1500);}
+    catch(e){toast('⚠ '+e.message,true);btn.textContent='Save';}
   }));
+  
+  const bulkCat = document.getElementById('bulkCatDelete');
+  const catSet = [...new Set(products.map(p=>p.category))];
+  bulkCat.innerHTML = '<option value="">Select Category...</option>' + catSet.map(c=>`<option value="${c}">${c}</option>`).join('');
 }
 document.getElementById('searchInput').addEventListener('input',e=>renderProductTable(e.target.value));
+
+document.getElementById('btnDeleteCat').addEventListener('click', async () => {
+  const cat = document.getElementById('bulkCatDelete').value;
+  if(!cat) return toast('⚠ Please select a category to delete.', true);
+  const items = products.filter(p => p.category === cat);
+  if(!items.length) return toast('⚠ No products found in this category.', true);
+  
+  if(!confirm(`Are you sure you want to delete the category "${cat}" and ALL ${items.length} products inside it? This cannot be undone.`)) return;
+  
+  toast('⏳ Deleting category...');
+  document.getElementById('btnDeleteCat').disabled = true;
+  for(let i=0; i<items.length; i++){
+    try {
+      await deleteDoc(doc(db, 'products', items[i].id));
+    } catch(e) {
+      console.warn('Delete failed', e);
+    }
+  }
+  document.getElementById('btnDeleteCat').disabled = false;
+  toast(`✓ Category "${cat}" deleted.`);
+  products = products.filter(p => p.category !== cat);
+  renderProductTable();
+});
 
 // ── Settings Form ──
 function renderSettingsForm(){
@@ -626,7 +731,7 @@ document.getElementById('seedBtn').addEventListener('click',()=>{
         try{
           await setDoc(doc(db,'products',p.id), {
             name:p.name, category:p.category, price:p.price, unit:p.unit,
-            badge:p.badge||'', description:p.description||'', stock:p.stock,
+            badge:p.badge||'', description:p.description||'', quantity:p.quantity||100,
             image:p.image, updatedAt:serverTimestamp(), createdAt:serverTimestamp()
           });
           count++;
