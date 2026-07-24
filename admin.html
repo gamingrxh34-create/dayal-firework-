@@ -159,18 +159,24 @@ tr:last-child td{border-bottom:none;}
     <!-- ORDERS -->
     <div class="tab-panel" id="tab-orders">
       <div class="panel">
-        <div class="toolbar">
-          <div style="display:flex;align-items:center;gap:10px;">
+        <div class="toolbar" style="flex-wrap:wrap;gap:10px;">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
             <h2>Incoming Orders</h2>
             <div class="live-badge"><span class="live-dot"></span>Auto-updating</div>
           </div>
-          <select id="orderFilter" class="status-select">
-            <option value="all">All Orders</option>
-            <option value="New">New</option>
-            <option value="Confirmed">Confirmed</option>
-            <option value="Ready for Pickup">Ready for Pickup</option>
-            <option value="Delivered">Delivered</option>
-          </select>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <div style="position:relative;">
+              <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);opacity:.5;">🔍</span>
+              <input type="text" id="orderSearch" class="search-input" placeholder="Search name or order ID…" style="padding-left:32px;min-width:200px;">
+            </div>
+            <select id="orderFilter" class="status-select">
+              <option value="all">All Orders</option>
+              <option value="New">New</option>
+              <option value="Confirmed">Confirmed</option>
+              <option value="Ready for Pickup">Ready for Pickup</option>
+              <option value="Delivered">Delivered</option>
+            </select>
+          </div>
         </div>
         <div class="stats-row" id="ordersStats" style="display:none;"></div>
         <div id="ordersError" class="orders-error" style="display:none;"></div>
@@ -328,7 +334,13 @@ function subscribeOrders(){
 
 function renderOrders(){
   const filter=document.getElementById('orderFilter').value;
-  const list=filter==='all'?allOrders:allOrders.filter(o=>o.status===filter);
+  const search=(document.getElementById('orderSearch').value||'').trim().toLowerCase();
+  let list=filter==='all'?[...allOrders]:allOrders.filter(o=>o.status===filter);
+  if(search) list=list.filter(o=>
+    (o.customerName||'').toLowerCase().includes(search)||
+    (o.orderId||'').toLowerCase().includes(search)||
+    (o.customerPhone||'').includes(search)
+  );
   const statsEl=document.getElementById('ordersStats');
   const total=allOrders.reduce((s,o)=>s+Number(o.total||0),0);
   statsEl.innerHTML=`
@@ -339,7 +351,10 @@ function renderOrders(){
   `;
   statsEl.style.display='grid';
   const listEl=document.getElementById('ordersList');
-  if(!list.length){listEl.innerHTML='<div class="no-orders">📦 No orders yet. They will appear here in real time.</div>';return;}
+  if(!list.length){
+    listEl.innerHTML=`<div class="no-orders">${search?'🔍 No orders matching "'+search+'"':'📦 No orders yet. They will appear here in real time.'}</div>`;
+    return;
+  }
   listEl.innerHTML=list.map(o=>{
     const items=Array.isArray(o.items)?o.items:[];
     const date=o.placedAt?o.placedAt.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:true}):'—';
@@ -360,6 +375,7 @@ function renderOrders(){
         <select class="status-select" data-docid="${o._docId}" id="sel-${o._docId}">
           ${['New','Confirmed','Ready for Pickup','Delivered','Cancelled'].map(s=>`<option value="${s}" ${o.status===s?'selected':''}>${s}</option>`).join('')}
         </select>
+        <button class="btn" style="font-size:12px;padding:6px 10px;" data-print="${o._docId}">🖨️ Print Bill</button>
       </div>
     </div>`;
   }).join('');
@@ -371,8 +387,83 @@ function renderOrders(){
       }catch(e){toast('⚠ Failed: '+e.message,true);}
     });
   });
+  listEl.querySelectorAll('[data-print]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const o=allOrders.find(x=>x._docId===btn.dataset.print);
+      if(o) printBill(o);
+    });
+  });
 }
 document.getElementById('orderFilter').addEventListener('change',renderOrders);
+document.getElementById('orderSearch').addEventListener('input',renderOrders);
+
+function printBill(o){
+  const s=dfw_getSettings();
+  const items=Array.isArray(o.items)?o.items:[];
+  const date=o.placedAt?o.placedAt.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:true}):'—';
+  const rows=items.map((it,i)=>`<tr style="background:${i%2===0?'#f9f9f9':'#fff'}">
+    <td style="padding:8px 10px;border:1px solid #e0e0e0;">${i+1}</td>
+    <td style="padding:8px 10px;border:1px solid #e0e0e0;font-weight:600;">${it.name}</td>
+    <td style="padding:8px 10px;border:1px solid #e0e0e0;color:#666;">${it.unit}</td>
+    <td style="padding:8px 10px;border:1px solid #e0e0e0;text-align:center;">${it.qty}</td>
+    <td style="padding:8px 10px;border:1px solid #e0e0e0;text-align:right;">&#8377;${Number(it.price).toLocaleString('en-IN')}</td>
+    <td style="padding:8px 10px;border:1px solid #e0e0e0;text-align:right;font-weight:700;">&#8377;${(it.price*it.qty).toLocaleString('en-IN')}</td>
+  </tr>`).join('');
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <title>Bill — ${o.orderId}</title>
+  <style>*{box-sizing:border-box;}body{font-family:Arial,sans-serif;margin:0;padding:0;color:#1a1a1a;}
+  @media print{.no-print{display:none!important;} body{padding:0;}}
+  </style></head><body>
+  <div class="no-print" style="background:#1a1a2e;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;">
+    <span style="color:#ffe566;font-weight:700;">Preview — Click Print to save as PDF</span>
+    <button onclick="window.print()" style="background:#ff6b1a;color:#fff;border:none;padding:10px 20px;border-radius:8px;font-weight:700;cursor:pointer;">🖨️ Print / Save PDF</button>
+  </div>
+  <div style="max-width:720px;margin:0 auto;padding:30px 24px;">
+    <div style="background:#0b0f1c;color:white;padding:24px 28px;border-radius:10px 10px 0 0;">
+      <div style="font-size:22px;font-weight:900;color:#ffe566;letter-spacing:1px;text-transform:uppercase;">🧨 ${s.shopName||'M/S Dayal Fire Works'}</div>
+      <div style="font-size:12px;color:#a8adc0;letter-spacing:2px;text-transform:uppercase;margin-top:3px;">${s.tagline||'Wholesale Cracker Godown'}</div>
+      <div style="font-size:12px;color:#ccc;margin-top:8px;">${s.address||''} ${s.altPhones&&s.altPhones.length?' | 📞 '+s.altPhones.join(' / '):''}</div>
+    </div>
+    <div style="background:#1b2338;color:#f3efe6;padding:14px 28px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+      <div><div style="font-size:10px;color:#a8adc0;text-transform:uppercase;letter-spacing:1px;">Order ID</div><div style="font-size:14px;font-weight:700;color:#ffe566;">${o.orderId||o._docId}</div></div>
+      <div><div style="font-size:10px;color:#a8adc0;text-transform:uppercase;letter-spacing:1px;">Date</div><div style="font-size:14px;font-weight:700;color:#ffe566;">${date}</div></div>
+      <div><div style="font-size:10px;color:#a8adc0;text-transform:uppercase;letter-spacing:1px;">Status</div><div style="font-size:13px;font-weight:700;"><span style="background:#d6293e;color:white;padding:3px 10px;border-radius:99px;font-size:11px;">${o.status||'New'}</span></div></div>
+    </div>
+    <div style="padding:16px 28px;border:1px solid #eee;border-top:none;">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#888;font-weight:700;margin-bottom:8px;">Customer Details</div>
+      <table style="width:100%;border-collapse:collapse;"><tr>
+        <td style="padding:6px 0;width:50%;"><div style="font-size:11px;color:#888;">Name</div><div style="font-weight:700;">${o.customerName||'—'}</div></td>
+        <td style="padding:6px 0;"><div style="font-size:11px;color:#888;">Phone</div><div style="font-weight:700;">${o.customerPhone||'—'}</div></td>
+      </tr></table>
+      ${o.note?`<div style="background:#fffbee;border:1px solid #e7b94c;border-radius:6px;padding:8px 12px;font-size:12px;color:#555;margin-top:8px;">📝 Note: ${o.note}</div>`:''}
+    </div>
+    <div style="padding:0 28px 16px;border:1px solid #eee;border-top:none;">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#888;font-weight:700;margin-bottom:8px;">Order Items</div>
+      <table style="width:100%;border-collapse:collapse;">
+        <thead><tr style="background:#0b0f1c;">
+          <th style="color:#ffe566;padding:9px 10px;text-align:left;border:1px solid #eee;font-size:11px;text-transform:uppercase;">#</th>
+          <th style="color:#ffe566;padding:9px 10px;text-align:left;border:1px solid #eee;font-size:11px;text-transform:uppercase;">Product</th>
+          <th style="color:#ffe566;padding:9px 10px;text-align:left;border:1px solid #eee;font-size:11px;text-transform:uppercase;">Unit</th>
+          <th style="color:#ffe566;padding:9px 10px;text-align:center;border:1px solid #eee;font-size:11px;text-transform:uppercase;">Qty</th>
+          <th style="color:#ffe566;padding:9px 10px;text-align:right;border:1px solid #eee;font-size:11px;text-transform:uppercase;">Rate</th>
+          <th style="color:#ffe566;padding:9px 10px;text-align:right;border:1px solid #eee;font-size:11px;text-transform:uppercase;">Amount</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+        <tfoot><tr style="background:#0b0f1c;">
+          <td colspan="5" style="text-align:right;padding:12px 10px;color:#ffe566;font-size:15px;font-weight:900;border:1px solid #333;">GRAND TOTAL</td>
+          <td style="text-align:right;padding:12px 10px;color:#ffe566;font-size:15px;font-weight:900;border:1px solid #333;">&#8377;${Number(o.total||0).toLocaleString('en-IN')}</td>
+        </tr></tfoot>
+      </table>
+    </div>
+    <div style="text-align:center;padding:14px 28px;background:#f5f5f5;border-radius:0 0 10px 10px;color:#777;font-size:11px;border-top:2px solid #ffe566;">
+      <p style="margin:0 0 4px;">Thank you for your order! We will confirm stock &amp; delivery details over WhatsApp.</p>
+      <p style="margin:0;font-size:10px;color:#aaa;">This is a computer-generated bill. No signature required.</p>
+    </div>
+  </div>
+  </body></html>`;
+  const w=window.open('','_blank','width=820,height=900');
+  if(w){w.document.write(html);w.document.close();}
+}
 
 // ── Product Form ──
 function renderProductForm(product){

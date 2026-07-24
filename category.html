@@ -9,20 +9,20 @@
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#07070e;
-    --panel:#0f0f1e;
-    --panel-2:#151528;
-    --fire:#ff6b1a;
-    --fire-soft:#ff9a4d;
-    --crimson:#e01a2e;
-    --spark:#ffd700;
-    --spark-soft:#ffe566;
-    --ember:#ff8c00;
-    --green:#2dba6a;
-    --text:#f5f0e8;
-    --muted:#8b92b8;
-    --line:rgba(255,107,26,0.18);
-    --glow:rgba(255,107,26,0.3);
+    --bg:#08080f;
+    --panel:#111122;
+    --panel-2:#181830;
+    --fire:#ff5500;
+    --fire-soft:#ff7733;
+    --crimson:#cc1530;
+    --spark:#f5c518;
+    --spark-soft:#f8d84c;
+    --ember:#e07600;
+    --green:#00c853;
+    --text:#f2ede4;
+    --muted:#7a82aa;
+    --line:rgba(245,197,24,.14);
+    --glow:rgba(255,85,0,.28);
     --radius:14px;
   }
   *{box-sizing:border-box;}
@@ -139,7 +139,7 @@
 
   /* ── Product Grid ── */
   .product-section{max-width:1200px; margin:0 auto; padding:0 20px 80px;}
-  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:20px;}
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:16px;}
   .card{
     background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
     overflow:hidden; display:flex; flex-direction:column; position:relative;
@@ -259,10 +259,38 @@
   }
   .cat-chip:hover{border-color:var(--fire); color:var(--fire-soft); box-shadow:0 0 12px rgba(255,107,26,0.2);}
 
+  /* ── Search bar ── */
+  .search-wrap{max-width:1200px;margin:0 auto;padding:0 20px 12px;}
+  .cat-search{
+    width:100%;background:var(--panel);border:1px solid var(--line);
+    color:var(--text);padding:11px 16px 11px 40px;border-radius:10px;
+    font-size:14px;font-family:inherit;
+    transition:border-color .2s;
+  }
+  .cat-search:focus{outline:none;border-color:var(--fire);}
+  .search-wrap-inner{position:relative;}
+  .search-wrap-inner .s-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);opacity:.45;font-size:15px;pointer-events:none;}
+  .search-count{font-size:12px;color:var(--muted);margin-top:6px;padding-left:2px;}
+
   @media(max-width:640px){
-    .cat-hero{min-height:200px;}
-    .cat-hero-icon{font-size:40px;}
-    .filter-bar{flex-direction:column; align-items:flex-start;}
+    .cat-hero{min-height:160px; padding:24px 16px 20px;}
+    .cat-hero-icon{font-size:32px; margin-bottom:8px;}
+    .cat-hero-title{font-size:28px;}
+    .cat-hero-sub{font-size:13px;}
+    .cat-stat{font-size:11px; padding:5px 10px;}
+    .filter-bar{flex-direction:column; align-items:flex-start; gap:8px; padding:10px 16px;}
+    .filter-bar-right{flex-wrap:wrap; gap:6px;}
+    .filter-chip{font-size:11px; padding:5px 10px;}
+    .grid{grid-template-columns:repeat(2,1fr); gap:10px;}
+    .card-body{padding:10px 10px 12px;}
+    .card-body h3{font-size:12px;}
+    .price{font-size:14px;}
+    .qty-stepper button{width:24px;height:24px;font-size:13px;}
+    .qty-stepper span{width:24px;font-size:12px;}
+    .add-btn{font-size:12px;padding:8px;}
+    .brand-text .display{font-size:16px;}
+    .phone-pill{display:none;}
+    .header-inner{padding:10px 14px;}
   }
   @media(prefers-reduced-motion:reduce){.particles span{animation:none !important;}}
 </style>
@@ -308,6 +336,15 @@
   <a href="index.html">🏠 Home</a>
   <span>›</span>
   <span id="breadcrumbCat">Category</span>
+</div>
+
+<!-- SEARCH BAR -->
+<div class="search-wrap">
+  <div class="search-wrap-inner">
+    <span class="s-icon">🔍</span>
+    <input type="search" class="cat-search" id="catSearch" placeholder="Search products in this category…" autocomplete="off">
+  </div>
+  <div class="search-count" id="searchCount"></div>
 </div>
 
 <!-- FILTER / SORT BAR -->
@@ -464,8 +501,10 @@
 
   // ── Render products ──
   function getVisibleProducts(){
+    const searchQ = (document.getElementById('catSearch')||{value:''}).value.trim().toLowerCase();
     let list = products.filter(p => p.category === catName);
     if (showInStockOnly) list = list.filter(p => p.stock);
+    if (searchQ) list = list.filter(p => p.name.toLowerCase().includes(searchQ) || (p.description||'').toLowerCase().includes(searchQ));
     if (sortMode === 'price-asc')  list = [...list].sort((a,b)=>a.price-b.price);
     if (sortMode === 'price-desc') list = [...list].sort((a,b)=>b.price-a.price);
     if (sortMode === 'name-asc')   list = [...list].sort((a,b)=>a.name.localeCompare(b.name));
@@ -475,9 +514,12 @@
   function renderProducts(){
     const grid = document.getElementById('productGrid');
     const list = getVisibleProducts();
+    const searchQ = (document.getElementById('catSearch')||{value:''}).value.trim();
+    const countEl = document.getElementById('searchCount');
+    if(countEl) countEl.textContent = searchQ ? `Showing ${list.length} result${list.length!==1?'s':''} for "${searchQ}"` : '';
 
     if (list.length === 0){
-      grid.innerHTML = '<div class="no-results" style="grid-column:1/-1;">😔 No products found in this category.</div>';
+      grid.innerHTML = `<div class="no-results" style="grid-column:1/-1;">${searchQ?'🔍 No products matching "'+searchQ+'" in this category.':'😔 No products found in this category.'}</div>`;
       return;
     }
 
@@ -577,6 +619,9 @@
     sortMode = e.target.value;
     renderProducts();
   });
+  // Search bar
+  const catSearchEl = document.getElementById('catSearch');
+  if(catSearchEl) catSearchEl.addEventListener('input', renderProducts);
 
   // ── Cart drawer ──
   const drawer  = document.getElementById('drawer');
