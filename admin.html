@@ -349,7 +349,7 @@ tr:last-child td{border-bottom:none;}
 <script src="store.js"></script>
 <script type="module">
 import { initializeApp }    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence }
                               from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import { getFirestore, collection, doc, getDoc, getDocs, setDoc, addDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy, serverTimestamp }
                               from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
@@ -359,6 +359,9 @@ const app  = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 const provider = new GoogleAuthProvider();
+
+// Keep admin signed in
+setPersistence(auth, browserLocalPersistence).catch(()=>{});
 
 let products   = [];
 let settings   = dfw_getSettings();
@@ -400,7 +403,14 @@ onAuthStateChanged(auth, async user => {
   renderCategoryAdmin();
 });
 
-document.getElementById('signInBtn').addEventListener('click',async()=>{try{await signInWithPopup(auth,provider);}catch(e){}});
+document.getElementById('signInBtn').addEventListener('click',async()=>{
+  try {
+    await signInWithPopup(auth,provider);
+  } catch(e) {
+    alert("Sign-in failed. Please allow popups for this site, or try again.");
+    console.error("Sign in error:", e);
+  }
+});
 document.getElementById('signOutBtn').addEventListener('click',()=>signOut(auth));
 
 // ── Tabs ──

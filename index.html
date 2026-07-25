@@ -246,7 +246,24 @@ footer{border-top:1px solid var(--line);padding:36px 20px 22px;}
   
   .sign-in-btn span{display:none;}
 }
+}
 @media(prefers-reduced-motion:reduce){.particles span{animation:none!important;}}
+
+/* ── Policy Consent Banner ── */
+.consent-banner{
+  position:fixed; bottom:20px; left:20px; right:20px; max-width:600px; margin:0 auto;
+  background:rgba(20,22,28,0.95); backdrop-filter:blur(12px); border:1px solid var(--spark);
+  border-radius:16px; padding:20px; z-index:1000; display:flex; flex-direction:column; gap:16px;
+  box-shadow:0 10px 40px rgba(0,0,0,0.5), 0 0 20px rgba(255,215,0,0.1);
+  transform:translateY(150%); transition:transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.consent-banner.show{transform:translateY(0);}
+.consent-banner p{margin:0;font-size:13px;line-height:1.5;color:var(--text);}
+.consent-banner a{color:var(--spark);text-decoration:none;font-weight:600;}
+.consent-banner a:hover{text-decoration:underline;}
+.consent-actions{display:flex;justify-content:flex-end;gap:12px;}
+.consent-btn{padding:10px 20px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;border:none;}
+.consent-btn.accept{background:linear-gradient(135deg,var(--spark),var(--fire));color:#000;}
 </style>
 </head>
 <body>
@@ -352,6 +369,14 @@ footer{border-top:1px solid var(--line);padding:36px 20px 22px;}
     <a href="admin.html" class="admin-link">Admin Dashboard</a>
   </div>
 </footer>
+
+<!-- Policy Consent Banner -->
+<div class="consent-banner" id="consentBanner">
+  <p>We use cookies and collect necessary data to process orders. By continuing to use this site, you agree to our <a href="privacy.html">Privacy Policy & Terms of Service</a>, and confirm you are of legal age to purchase fireworks.</p>
+  <div class="consent-actions">
+    <button class="consent-btn accept" id="acceptConsentBtn">I Accept</button>
+  </div>
+</div>
 
 <div class="overlay" id="overlay"></div>
 <aside class="drawer" id="drawer">
@@ -667,6 +692,15 @@ if (particlesEl) {
     particlesEl.appendChild(s);
   }
 }
+
+// ── Policy Consent Logic ──
+if(!localStorage.getItem('dfw_policy_accepted')){
+  setTimeout(()=>document.getElementById('consentBanner').classList.add('show'), 1500);
+}
+document.getElementById('acceptConsentBtn').addEventListener('click', ()=>{
+  localStorage.setItem('dfw_policy_accepted', 'true');
+  document.getElementById('consentBanner').classList.remove('show');
+});
 </script>
 </body>
 </html>
