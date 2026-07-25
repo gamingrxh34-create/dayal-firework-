@@ -132,6 +132,34 @@ tr:last-child td{border-bottom:none;}
 .modal h3{margin:0 0 8px;font-size:16px;color:var(--spark-soft);}
 .modal p{color:var(--muted);font-size:13px;line-height:1.6;}
 .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px;}
+/* ── Period Filter Chips ── */
+.period-chip{
+  padding:5px 13px; border-radius:99px; font-size:12px; font-weight:600;
+  background:var(--panel-2); border:1px solid var(--line); color:var(--muted); cursor:pointer;
+  transition:all .15s;
+}
+.period-chip.active{
+  background:rgba(255,215,0,0.12); border-color:var(--spark); color:var(--spark-soft);
+}
+.period-chip:hover:not(.active){ border-color:var(--fire); color:var(--fire-soft); }
+/* ── Category Cards (admin) ── */
+.cat-admin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-top:4px;}
+.cat-admin-card{
+  background:var(--panel-2);border:1px solid var(--line);border-radius:14px;overflow:hidden;
+  display:flex;flex-direction:column;transition:border-color .2s;
+}
+.cat-admin-card:hover{border-color:rgba(255,107,26,.4);}
+.cat-admin-thumb{
+  width:100%;height:120px;object-fit:cover;background:var(--panel);
+  display:flex;align-items:center;justify-content:center;font-size:40px;
+}
+.cat-admin-thumb img{width:100%;height:100%;object-fit:cover;}
+.cat-admin-info{padding:12px 14px;flex:1;}
+.cat-admin-name{font-weight:700;font-size:13px;margin-bottom:3px;}
+.cat-admin-meta{font-size:11px;color:var(--muted);margin-bottom:10px;}
+.cat-admin-actions{display:flex;gap:6px;}
+.cat-edit-btn{flex:1;padding:6px;border-radius:7px;background:rgba(255,107,26,.1);border:1px solid rgba(255,107,26,.3);color:var(--fire-soft);font-size:12px;font-weight:600;cursor:pointer;}
+.cat-edit-btn:hover{background:rgba(255,107,26,.2);}
 .empty-state{text-align:center;color:var(--muted);padding:50px 0;font-size:13px;}
 </style>
 </head>
@@ -167,6 +195,7 @@ tr:last-child td{border-bottom:none;}
     <button class="tab active" data-tab="orders">📋 Orders</button>
     <button class="tab" data-tab="sales">📈 Daily Sales</button>
     <button class="tab" data-tab="products">🛒 Products</button>
+    <button class="tab" data-tab="categories">🗂️ Categories</button>
     <button class="tab" data-tab="settings">⚙️ Settings</button>
     <button class="tab" data-tab="backup">💾 Backup</button>
   </div>
@@ -194,6 +223,15 @@ tr:last-child td{border-bottom:none;}
             </select>
           </div>
         </div>
+        <!-- Period filter for stats -->
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
+          <button class="period-chip active" data-period="all">All Time</button>
+          <button class="period-chip" data-period="today">Today</button>
+          <button class="period-chip" data-period="week">This Week</button>
+          <button class="period-chip" data-period="month">This Month</button>
+          <button class="period-chip" data-period="6months">6 Months</button>
+          <button class="period-chip" data-period="year">1 Year</button>
+        </div>
         <div class="stats-row" id="ordersStats" style="display:none;"></div>
         <div id="ordersError" class="orders-error" style="display:none;"></div>
         <div id="ordersLoading" style="text-align:center;color:var(--muted);padding:40px;">⏳ Connecting to database…</div>
@@ -201,15 +239,21 @@ tr:last-child td{border-bottom:none;}
       </div>
     </div>
 
-    <!-- DAILY SALES -->
+    <!-- SALES REPORT -->
     <div class="tab-panel" id="tab-sales" style="display:none;">
       <div class="panel">
-        <div class="toolbar">
-          <h2>Daily Sales & Restock Report</h2>
-          <div style="font-size:13px;color:var(--muted);">Today's Confirmed Items</div>
+        <div class="toolbar" style="flex-wrap:wrap;gap:12px;">
+          <div>
+            <h2>📅 Sales Report</h2>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px;">Confirmed & Delivered orders, grouped by date</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <input type="date" id="salesDateFilter" class="search-input" style="width:auto;">
+            <button class="btn" id="salesClearDate" style="font-size:12px;padding:6px 10px;">Show All</button>
+          </div>
         </div>
-        <p style="color:var(--muted);font-size:13px;line-height:1.7;">This report aggregates all items from orders marked as <strong>Completed</strong> or <strong>Confirmed</strong> that were updated today. Use this to easily deduct inventory in bulk at the end of the day.</p>
-        <div style="overflow-x:auto;"><table id="salesTable"></table></div>
+        <div id="salesSummaryBar" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;"></div>
+        <div id="salesReportBody"><div class="empty-state">⏳ Loading…</div></div>
       </div>
     </div>
 
@@ -229,6 +273,39 @@ tr:last-child td{border-bottom:none;}
           </div>
         </div>
         <div style="overflow-x:auto;"><table id="productTable"></table></div>
+      </div>
+    </div>
+
+    <!-- CATEGORIES -->
+    <div class="tab-panel" id="tab-categories" style="display:none;">
+      <div class="panel">
+        <div class="toolbar">
+          <h2>🖼️ Category Images & Icons</h2>
+          <p style="color:var(--muted);font-size:12px;margin:0;">Click a category to set its photo and emoji icon.</p>
+        </div>
+        <div class="cat-admin-grid" id="catAdminGrid"><div class="empty-state">⏳ Loading categories…</div></div>
+      </div>
+
+      <!-- Category Edit Form (hidden by default) -->
+      <div class="panel" id="catEditPanel" style="display:none;margin-top:18px;">
+        <div class="toolbar"><h2 id="catEditTitle">Edit Category</h2></div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Emoji Icon</label>
+            <input type="text" id="catEditIcon" maxlength="4" placeholder="e.g. ✨" style="font-size:24px;text-align:center;">
+          </div>
+          <div class="field">
+            <label>Category Photo</label>
+            <div class="img-upload">
+              <img id="catEditImgPrev" class="img-preview" style="width:80px;height:80px;" src="" alt="">
+              <input type="file" id="catEditImgFile" accept="image/*">
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn" id="catEditCancel">Cancel</button>
+            <button class="btn btn-primary" id="catEditSave">💾 Save Category</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -286,6 +363,9 @@ const provider = new GoogleAuthProvider();
 let products   = [];
 let settings   = dfw_getSettings();
 let allOrders  = [];
+let categories = {}; // { catName: { icon, image } }
+let editingCat = null;
+let pendingCatImg = null;
 let editingId  = null;
 let pendingImg = null;
 let unsubOrders= null;
@@ -312,10 +392,12 @@ onAuthStateChanged(auth, async user => {
   document.getElementById('userChip').innerHTML=`<img src="${user.photoURL||''}" alt=""> ${user.displayName||user.email}`;
   await loadProducts();
   await loadSettings();
+  await loadCategories();
   subscribeOrders();
   renderProductForm(null);
   renderProductTable();
   renderSettingsForm();
+  renderCategoryAdmin();
 });
 
 document.getElementById('signInBtn').addEventListener('click',async()=>{try{await signInWithPopup(auth,provider);}catch(e){}});
@@ -328,6 +410,8 @@ document.querySelectorAll('.tab').forEach(tab=>{
     tab.classList.add('active');
     document.querySelectorAll('.tab-panel').forEach(p=>p.style.display='none');
     document.getElementById('tab-'+tab.dataset.tab).style.display='block';
+    if(tab.dataset.tab === 'categories') renderCategoryAdmin();
+    if(tab.dataset.tab === 'sales') renderDailySales();
   });
 });
 
@@ -365,6 +449,27 @@ function subscribeOrders(){
   });
 }
 
+let statsperiod = 'all';
+
+function getOrdersInPeriod(orders, period){
+  if(period === 'all') return orders;
+  const now = new Date();
+  let from;
+  if(period === 'today'){
+    from = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  } else if(period === 'week'){
+    from = new Date(now); from.setDate(now.getDate() - now.getDay());
+    from.setHours(0,0,0,0);
+  } else if(period === 'month'){
+    from = new Date(now.getFullYear(), now.getMonth(), 1);
+  } else if(period === '6months'){
+    from = new Date(now); from.setMonth(now.getMonth() - 6);
+  } else if(period === 'year'){
+    from = new Date(now); from.setFullYear(now.getFullYear() - 1);
+  }
+  return orders.filter(o => o.placedAt && new Date(o.placedAt) >= from);
+}
+
 function renderOrders(){
   const filter=document.getElementById('orderFilter').value;
   const search=(document.getElementById('orderSearch').value||'').trim().toLowerCase();
@@ -374,12 +479,15 @@ function renderOrders(){
     (o.orderId||'').toLowerCase().includes(search)||
     (o.customerPhone||'').includes(search)
   );
+  // Stats use the selected period
+  const periodOrders = getOrdersInPeriod(allOrders, statsperiod);
   const statsEl=document.getElementById('ordersStats');
-  const total=allOrders.reduce((s,o)=>s+Number(o.total||0),0);
+  const total=periodOrders.reduce((s,o)=>s+Number(o.total||0),0);
+  const periodLabel = {all:'All Time',today:'Today',week:'This Week',month:'This Month','6months':'6 Months',year:'1 Year'}[statsperiod];
   statsEl.innerHTML=`
-    <div class="stat-card"><div class="stat-num">${allOrders.length}</div><div class="stat-label">Total Orders</div></div>
-    <div class="stat-card"><div class="stat-num" style="color:var(--crimson);">${allOrders.filter(o=>o.status==='New').length}</div><div class="stat-label">New</div></div>
-    <div class="stat-card"><div class="stat-num" style="color:var(--green);">${allOrders.filter(o=>o.status==='Delivered').length}</div><div class="stat-label">Delivered</div></div>
+    <div class="stat-card"><div class="stat-num">${periodOrders.length}</div><div class="stat-label">Orders · ${periodLabel}</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--crimson);">${periodOrders.filter(o=>o.status==='New').length}</div><div class="stat-label">New</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--green);">${periodOrders.filter(o=>o.status==='Delivered').length}</div><div class="stat-label">Delivered</div></div>
     <div class="stat-card"><div class="stat-num">${dfw_formatINR(total)}</div><div class="stat-label">Revenue</div></div>
   `;
   statsEl.style.display='grid';
@@ -430,41 +538,104 @@ function renderOrders(){
 document.getElementById('orderFilter').addEventListener('change',renderOrders);
 document.getElementById('orderSearch').addEventListener('input',renderOrders);
 
+// Period chip clicks
+document.querySelectorAll('.period-chip').forEach(chip=>{
+  chip.addEventListener('click',()=>{
+    document.querySelectorAll('.period-chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    statsperiod = chip.dataset.period;
+    renderOrders();
+  });
+});
+
+// ── Sales Report ──
 function renderDailySales(){
-  const today = new Date().toLocaleDateString();
-  const salesTable = document.getElementById('salesTable');
-  
-  // Filter for completed/confirmed orders updated today
-  const todaysOrders = allOrders.filter(o => 
-    (o.status === 'Completed' || o.status === 'Confirmed' || o.status === 'Delivered') &&
-    o.updatedAt && o.updatedAt.toLocaleDateString() === today
+  const filterDateInput = document.getElementById('salesDateFilter');
+  const filterDate = filterDateInput ? filterDateInput.value : ''; // yyyy-mm-dd
+
+  // Only include Confirmed / Delivered orders
+  const relevantOrders = allOrders.filter(o =>
+    (o.status === 'Confirmed' || o.status === 'Delivered' || o.status === 'Completed') &&
+    o.placedAt
   );
 
-  const aggregated = {};
-  todaysOrders.forEach(o => {
-    (o.items || []).forEach(it => {
-      if(!aggregated[it.id]) aggregated[it.id] = { name: it.name, qty: 0 };
-      aggregated[it.id].qty += it.qty;
+  // Group orders by date string (dd MMM yyyy)
+  const byDate = {};
+  relevantOrders.forEach(o => {
+    const d = o.placedAt instanceof Date ? o.placedAt : (o.placedAt?.toDate ? o.placedAt.toDate() : new Date(o.placedAt));
+    const isoDate = d.toISOString().slice(0,10); // yyyy-mm-dd for filtering
+    const label   = d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}); // display
+    if(filterDate && isoDate !== filterDate) return; // skip if filtered
+    if(!byDate[isoDate]) byDate[isoDate] = { label, orders:[], products:{}, total:0 };
+    byDate[isoDate].orders.push(o);
+    byDate[isoDate].total += (o.total||0);
+    (o.items||[]).forEach(it=>{
+      const key = it.name;
+      if(!byDate[isoDate].products[key]) byDate[isoDate].products[key]={name:it.name, qty:0, revenue:0};
+      byDate[isoDate].products[key].qty     += it.qty;
+      byDate[isoDate].products[key].revenue += it.price * it.qty;
     });
   });
 
-  const rows = Object.values(aggregated).sort((a,b)=>b.qty - a.qty);
-  
-  if (rows.length === 0){
-    salesTable.innerHTML = `<tr><td class="empty-state">No confirmed items today yet.</td></tr>`;
+  const sortedDates = Object.keys(byDate).sort((a,b)=>b.localeCompare(a)); // newest first
+
+  // Summary bar
+  const summaryBar = document.getElementById('salesSummaryBar');
+  const totalRevAll = sortedDates.reduce((s,d)=>s+byDate[d].total,0);
+  const totalOrdersAll = sortedDates.reduce((s,d)=>s+byDate[d].orders.length,0);
+  summaryBar.innerHTML = [
+    `<div class="stat-card" style="padding:10px 16px;min-width:120px;"><div class="stat-num">${sortedDates.length}</div><div class="stat-label">${filterDate?'Date':'Days'}</div></div>`,
+    `<div class="stat-card" style="padding:10px 16px;min-width:120px;"><div class="stat-num">${totalOrdersAll}</div><div class="stat-label">Orders</div></div>`,
+    `<div class="stat-card" style="padding:10px 16px;min-width:140px;"><div class="stat-num" style="font-size:18px;">${dfw_formatINR(totalRevAll)}</div><div class="stat-label">Revenue</div></div>`,
+  ].join('');
+
+  const body = document.getElementById('salesReportBody');
+
+  if(!sortedDates.length){
+    body.innerHTML = `<div class="empty-state">${filterDate ? '📅 No confirmed sales on this date.' : '📦 No confirmed sales yet.'}</div>`;
     return;
   }
-  
-  salesTable.innerHTML = `
-    <thead><tr><th style="text-align:left;">Product</th><th style="text-align:center;">Qty Sold Today</th></tr></thead>
-    <tbody>
-      ${rows.map(r => `<tr>
-        <td style="font-weight:600;">${dfw_escapeHTML(r.name)}</td>
-        <td style="text-align:center;font-size:18px;font-family:'JetBrains Mono';color:var(--spark);">${r.qty}</td>
-      </tr>`).join('')}
-    </tbody>
-  `;
+
+  body.innerHTML = sortedDates.map(isoDate => {
+    const day = byDate[isoDate];
+    const prods = Object.values(day.products).sort((a,b)=>b.qty-a.qty);
+    return `
+    <div style="margin-bottom:20px;border:1px solid var(--line);border-radius:14px;overflow:hidden;">
+      <!-- Date header -->
+      <div style="background:rgba(255,215,0,0.06);border-bottom:1px solid var(--line);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:16px;">📅</span>
+          <span style="font-weight:800;font-size:15px;color:var(--spark-soft);">${day.label}</span>
+          <span style="font-size:12px;color:var(--muted);background:var(--panel-2);padding:3px 9px;border-radius:99px;">${day.orders.length} order${day.orders.length!==1?'s':''}</span>
+        </div>
+        <span style="font-family:'JetBrains Mono';font-weight:700;font-size:15px;color:var(--green);">${dfw_formatINR(day.total)}</span>
+      </div>
+      <!-- Products table -->
+      <div style="overflow-x:auto;">
+        <table style="width:100%;">
+          <thead><tr>
+            <th style="text-align:left;padding:8px 18px;">Product</th>
+            <th style="text-align:center;padding:8px 10px;">Qty Sold</th>
+            <th style="text-align:right;padding:8px 18px;">Revenue</th>
+          </tr></thead>
+          <tbody>
+            ${prods.map(p=>`<tr>
+              <td style="padding:8px 18px;font-weight:600;">${dfw_escapeHTML(p.name)}</td>
+              <td style="text-align:center;font-family:'JetBrains Mono';font-weight:700;font-size:16px;color:var(--spark);">${p.qty}</td>
+              <td style="text-align:right;padding:8px 18px;font-family:'JetBrains Mono';color:var(--green);">${dfw_formatINR(p.revenue)}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+  }).join('');
 }
+
+document.getElementById('salesDateFilter').addEventListener('change', renderDailySales);
+document.getElementById('salesClearDate').addEventListener('click', ()=>{
+  document.getElementById('salesDateFilter').value = '';
+  renderDailySales();
+});
 
 function printBill(o){
   const s=dfw_getSettings();
@@ -761,6 +932,99 @@ document.getElementById('importFile').addEventListener('change',e=>{
     }catch(e){toast('⚠ Could not read file.',true);}
   };
   reader.readAsText(file);
+});
+
+}
+
+// ── Categories ──
+async function loadCategories(){
+  try{
+    const snap = await getDocs(collection(db,'categories'));
+    categories = {};
+    snap.docs.forEach(d => { categories[d.id] = d.data(); });
+  }catch(e){ console.warn('Could not load categories', e); }
+}
+
+function renderCategoryAdmin(){
+  const grid = document.getElementById('catAdminGrid');
+  // Get all unique categories from products
+  const catNames = [...new Set(products.map(p=>p.category))].filter(Boolean).sort();
+  // Also add any from DFW_CATEGORIES that aren't in products
+  DFW_CATEGORIES.forEach(c=>{ if(!catNames.includes(c)) catNames.push(c); });
+
+  if(!catNames.length){
+    grid.innerHTML = '<div class="empty-state">No categories found. Add products first.</div>';
+    return;
+  }
+
+  grid.innerHTML = catNames.map(cat=>{
+    const meta = categories[cat] || {};
+    const icon = meta.icon || dfw_categoryIcon(cat);
+    const img  = meta.image || '';
+    const count = products.filter(p=>p.category===cat).length;
+    const thumbHtml = img
+      ? `<div class="cat-admin-thumb"><img src="${img}" alt="${dfw_escapeHTML(cat)}" onerror="this.parentElement.textContent='${icon}'"></div>`
+      : `<div class="cat-admin-thumb">${icon}</div>`;
+    return `<div class="cat-admin-card">
+      ${thumbHtml}
+      <div class="cat-admin-info">
+        <div class="cat-admin-name">${dfw_escapeHTML(cat)}</div>
+        <div class="cat-admin-meta">${count} product${count!==1?'s':''} · Icon: ${icon}</div>
+        <div class="cat-admin-actions">
+          <button class="cat-edit-btn" data-cat="${dfw_escapeHTML(cat)}">✏️ Edit</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  grid.querySelectorAll('[data-cat]').forEach(btn=>{
+    btn.addEventListener('click', ()=> openCatEdit(btn.dataset.cat));
+  });
+}
+
+function openCatEdit(catName){
+  editingCat = catName;
+  pendingCatImg = (categories[catName]||{}).image || null;
+  const meta = categories[catName] || {};
+  document.getElementById('catEditTitle').textContent = 'Edit: ' + catName;
+  document.getElementById('catEditIcon').value = meta.icon || dfw_categoryIcon(catName);
+  const prev = document.getElementById('catEditImgPrev');
+  prev.src = pendingCatImg || '';
+  prev.style.display = pendingCatImg ? 'block' : 'none';
+  document.getElementById('catEditImgFile').value = '';
+  document.getElementById('catEditPanel').style.display = 'block';
+  document.getElementById('catEditPanel').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+document.getElementById('catEditImgFile').addEventListener('change', async e=>{
+  const file = e.target.files[0]; if(!file) return;
+  try{
+    pendingCatImg = await dfw_resizeImage(file, 800, 0.85);
+    const prev = document.getElementById('catEditImgPrev');
+    prev.src = pendingCatImg;
+    prev.style.display = 'block';
+  }catch(err){ toast('⚠ Could not load image.', true); }
+});
+
+document.getElementById('catEditSave').addEventListener('click', async ()=>{
+  if(!editingCat) return;
+  const icon = document.getElementById('catEditIcon').value.trim() || dfw_categoryIcon(editingCat);
+  const btn = document.getElementById('catEditSave');
+  btn.disabled = true; btn.textContent = '⏳ Saving…';
+  try{
+    const data = { icon, image: pendingCatImg || null, updatedAt: serverTimestamp() };
+    await setDoc(doc(db,'categories', editingCat), data, {merge:true});
+    categories[editingCat] = { ...categories[editingCat], icon, image: pendingCatImg || null };
+    toast('✓ Category "' + editingCat + '" saved!');
+    document.getElementById('catEditPanel').style.display = 'none';
+    renderCategoryAdmin();
+  }catch(e){ toast('⚠ Save failed: '+e.message, true); }
+  btn.disabled = false; btn.textContent = '💾 Save Category';
+});
+
+document.getElementById('catEditCancel').addEventListener('click', ()=>{
+  document.getElementById('catEditPanel').style.display = 'none';
+  editingCat = null; pendingCatImg = null;
 });
 
 // ── Confirm Modal ──

@@ -106,6 +106,7 @@ header{
   border-radius:20px;padding:24px 12px 18px;text-align:center;text-decoration:none;color:var(--text);display:block;
   transition:transform .3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow .3s, border-color .3s;
   border:1px solid rgba(255,255,255,0.06); backdrop-filter:blur(10px);
+  position:relative; overflow:hidden;
 }
 .cat-card:hover{transform:translateY(-6px);border-color:rgba(212,175,55,0.4);box-shadow:0 16px 40px rgba(212,175,55,0.15);}
 .cat-card .cat-icon{font-size:42px;margin-bottom:12px;filter:drop-shadow(0 0 12px rgba(212,175,55,0.5));display:block;transition:transform .3s;}
@@ -206,7 +207,7 @@ footer{border-top:1px solid var(--line);padding:36px 20px 22px;}
 .disclaimer{max-width:680px;margin:22px auto 0;font-size:11px;line-height:1.6;opacity:.55;text-align:center;}
 .admin-link{display:block;text-align:center;margin-top:14px;font-size:11px;color:var(--muted);opacity:.35;text-decoration:none;}
 @media(max-width:700px){
-  header { margin:0; border-radius:0; border-left:none; border-right:none; border-top:none; }
+  header { margin:0; top:0; border-radius:0; border-left:none; border-right:none; border-top:none; }
   .footer-grid{grid-template-columns:1fr;text-align:center;}
   .foot-left a,.foot-right{justify-content:center;text-align:center;}
 }
@@ -345,7 +346,11 @@ footer{border-top:1px solid var(--line);padding:36px 20px 22px;}
     </div>
   </div>
   <p class="disclaimer">Please burst crackers responsibly, within permitted hours, and as per PESO guidelines. Sale to minors not permitted.</p>
-  <a href="admin.html" class="admin-link">Admin</a>
+  <div style="display:flex; justify-content:center; gap:20px; align-items:center; margin-top:10px;">
+    <a href="privacy.html" class="admin-link">Privacy Policy & Terms</a>
+    <span style="color:var(--line);">|</span>
+    <a href="admin.html" class="admin-link">Admin Dashboard</a>
+  </div>
 </footer>
 
 <div class="overlay" id="overlay"></div>
@@ -372,7 +377,7 @@ footer{border-top:1px solid var(--line);padding:36px 20px 22px;}
 <script src="store.js"></script>
 <script type="module">
 import { initializeApp }          from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence }
                                     from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import { getFirestore, collection, doc, getDoc, getDocs, addDoc, serverTimestamp, query, orderBy }
                                     from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
@@ -384,6 +389,9 @@ const auth = getAuth(app);
 const db   = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
+// Keep user signed in across page loads and browser restarts
+setPersistence(auth, browserLocalPersistence).catch(()=>{});
+
 let currentUser = null;
 let products    = dfw_getCachedProducts();
 let cart        = dfw_getCart();
@@ -391,6 +399,7 @@ let settings    = dfw_getSettings();
 let searchTerm  = '';
 
 // ── Load settings & products from Firestore ──
+let catsMeta = dfw_getCachedCategories();
 async function loadFromFirestore(){
   try {
     const snap = await getDoc(doc(db,'settings','shop'));
@@ -402,6 +411,12 @@ async function loadFromFirestore(){
       const list = snap.docs.map(d=>({id:d.id,...d.data()}));
       products = list; dfw_saveCachedProducts(products);
     }
+  } catch(e){}
+  try {
+    const snap = await getDocs(collection(db,'categories'));
+    catsMeta = {};
+    snap.docs.forEach(d=>{ catsMeta[d.id] = d.data(); });
+    dfw_saveCachedCategories(catsMeta);
   } catch(e){}
   applySettings();
   renderCatCards();
@@ -480,10 +495,16 @@ function renderCatCards(){
   el.innerHTML=cats.map(cat=>{
     const count=products.filter(p=>p.category===cat&&p.quantity>0).length;
     const total=products.filter(p=>p.category===cat).length;
-    return `<a href="category.html?cat=${encodeURIComponent(cat)}" class="cat-card">
-      <span class="cat-icon">${dfw_categoryIcon(cat)}</span>
-      <div class="cat-name">${dfw_escapeHTML(cat)}</div>
-      <div class="cat-count">${count} in stock · ${total} items</div>
+    const icon = dfw_getCatIcon(cat, catsMeta);
+    const img  = dfw_getCatImage(cat, catsMeta);
+    const bgStyle = img
+      ? `style="background-image:url('${img}');background-size:cover;background-position:center;"`
+      : '';
+    return `<a href="category.html?cat=${encodeURIComponent(cat)}" class="cat-card" ${bgStyle}>
+      ${img ? '<div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.75),rgba(0,0,0,0.2));border-radius:16px;"></div>' : ''}
+      <span class="cat-icon" style="position:relative;z-index:1;">${icon}</span>
+      <div class="cat-name" style="position:relative;z-index:1;">${dfw_escapeHTML(cat)}</div>
+      <div class="cat-count" style="position:relative;z-index:1;">${count} in stock · ${total} items</div>
     </a>`;
   }).join('');
 }

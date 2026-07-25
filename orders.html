@@ -126,7 +126,7 @@ header{
 .whatsapp-contact{display:inline-flex;align-items:center;gap:6px;background:#25D366;color:#04210f;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;border:none;cursor:pointer;}
 
 @media(max-width:520px){
-  header { margin:0; border-radius:0; border-left:none; border-right:none; border-top:none; }
+  header { margin:0; top:0; border-radius:0; border-left:none; border-right:none; border-top:none; }
   .order-card-header{flex-direction:column;align-items:flex-start;}
   .bill-rate{display:none;}
   .bill-table thead th:nth-child(3){display:none;}
@@ -150,7 +150,7 @@ header{
 </header>
 
 <!-- Sign-in gate (shown when not logged in) -->
-<div class="auth-gate" id="authGate">
+<div class="auth-gate" id="authGate" style="display:none;">
   <div class="auth-gate-card">
     <div class="icon">📦</div>
     <h2>Track Your Orders</h2>
@@ -191,12 +191,15 @@ header{
     <div class="loading" id="ordersLoading">⏳ Loading your orders…</div>
     <div id="ordersList"></div>
   </div>
+  <div style="text-align:center; padding: 20px 0;">
+    <a href="privacy.html" style="color:var(--muted); text-decoration:none; font-size:13px; font-weight:600;">Privacy Policy & Terms</a>
+  </div>
 </div>
 
 <script src="store.js"></script>
 <script type="module">
 import { initializeApp }    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence }
                               from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import { getFirestore, collection, query, where, orderBy, onSnapshot }
                               from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
@@ -206,6 +209,9 @@ const app  = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 const provider = new GoogleAuthProvider();
+
+// Keep user signed in across page loads and browser restarts
+setPersistence(auth, browserLocalPersistence).catch(()=>{});
 
 let allOrders   = [];
 let activeFilter= 'all';
@@ -222,6 +228,7 @@ onAuthStateChanged(auth, user => {
     document.getElementById('userEmail').textContent = user.email;
     subscribeOrders(user.uid);
   } else {
+    // Only show the sign-in gate AFTER Firebase has confirmed no user
     document.getElementById('authGate').style.display  = 'flex';
     document.getElementById('mainContent').style.display = 'none';
     if (unsubscribe){ unsubscribe(); unsubscribe=null; }

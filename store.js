@@ -74,8 +74,8 @@ const DFW_SEED_PRODUCTS = [
   { id:'p15', name:'Green Flower Pot',                 category:'Green Crackers',   price:60,   unit:'per piece',        quantity:100, badge:'Green Cracker',image:dfw_placeholderImage('🌿','#1a4023'), description:'Eco-friendly anar, less smoke.' }
 ];
 
-// ── localStorage keys ────────────────────────────────────────
-const DFW_KEYS = { cart:'dfw_cart_v2', products:'dfw_products_v3', settings:'dfw_settings_v3' };
+// ── localStorage keys ──────────────────────────────
+const DFW_KEYS = { cart:'dfw_cart_v2', products:'dfw_products_v3', settings:'dfw_settings_v3', categories:'dfw_categories_v1' };
 
 // ── Cart (always localStorage) ───────────────────────────────
 function dfw_getCart(){ try{ return JSON.parse(localStorage.getItem(DFW_KEYS.cart)||'{}'); }catch(e){ return {}; } }
@@ -87,6 +87,21 @@ function dfw_getCachedProducts(){
   catch(e){ return [...DFW_SEED_PRODUCTS]; }
 }
 function dfw_saveCachedProducts(p){ localStorage.setItem(DFW_KEYS.products, JSON.stringify(p)); }
+
+// ── Category meta cache (icon + image) ────────────────────
+// categories = { 'Sparklers': { icon:'✨', image:'data:...' }, ... }
+function dfw_getCachedCategories(){
+  try{ return JSON.parse(localStorage.getItem(DFW_KEYS.categories)||'{}'); }catch(e){ return {}; }
+}
+function dfw_saveCachedCategories(c){ localStorage.setItem(DFW_KEYS.categories, JSON.stringify(c)); }
+// Get icon for a category (checks cache first, then falls back to built-in map)
+function dfw_getCatIcon(cat, catsMeta){
+  return (catsMeta && catsMeta[cat] && catsMeta[cat].icon) ? catsMeta[cat].icon : dfw_categoryIcon(cat);
+}
+// Get image for a category (returns null if none set)
+function dfw_getCatImage(cat, catsMeta){
+  return (catsMeta && catsMeta[cat] && catsMeta[cat].image) ? catsMeta[cat].image : null;
+}
 
 // ── Settings local cache ─────────────────────────────────────
 const DFW_SETTINGS_DEFAULT = {

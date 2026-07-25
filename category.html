@@ -77,30 +77,51 @@
 
   /* ── Category Hero ── */
   .cat-hero{
-    position:relative; overflow:hidden; border-radius:24px;
-    min-height:280px; display:flex; align-items:flex-end;
-    padding:40px 30px 36px; margin:24px 20px 0; max-width:1160px; margin-left:auto; margin-right:auto;
-    border:1px solid rgba(212,175,55,0.25); box-shadow:0 12px 50px rgba(212,175,55,0.12);
+    position:relative; overflow:hidden;
+    max-width:1200px; margin:28px auto 0; padding:0 20px;
   }
-  .cat-hero-bg{
-    position:absolute; inset:0; z-index:0;
-    background-size:cover; background-position:center;
+  .cat-hero-inner{
+    display:flex; align-items:center; gap:20px;
+    background:linear-gradient(135deg, rgba(255,107,53,0.08), rgba(255,215,0,0.06), rgba(224,26,46,0.06));
+    border:1px solid rgba(212,175,55,0.2);
+    border-radius:20px; padding:24px 28px;
+    position:relative; overflow:hidden;
   }
-  .cat-hero-overlay{
-    position:absolute; inset:0; z-index:1;
+  .cat-hero-inner::before{
+    content:''; position:absolute; left:0; top:0; bottom:0; width:4px;
+    background:linear-gradient(to bottom, var(--spark), var(--fire), var(--crimson));
+    border-radius:4px 0 0 4px;
   }
-  .cat-hero-content{
-    position:relative; z-index:2;
-    max-width:1200px; margin:0 auto; width:100%;
+  .cat-hero-inner::after{
+    content:''; position:absolute; top:-60px; right:-60px;
+    width:200px; height:200px; border-radius:50%;
+    background:radial-gradient(circle, rgba(255,215,0,0.06), transparent 70%);
+    pointer-events:none;
   }
-  .cat-hero-icon{font-size:56px; margin-bottom:12px; filter:drop-shadow(0 0 20px rgba(255,140,0,0.9)); display:block;}
-  .cat-hero-title{font-size:clamp(32px,6vw,64px); color:var(--text); margin:0 0 8px; line-height:1; text-shadow:0 2px 20px rgba(0,0,0,0.6);}
-  .cat-hero-sub{font-size:15px; color:rgba(245,240,232,0.8); margin:0 0 16px; font-weight:500;}
-  .cat-hero-stats{display:flex; gap:16px; flex-wrap:wrap;}
+  .cat-hero-icon{
+    font-size:52px; flex-shrink:0;
+    filter:drop-shadow(0 0 18px rgba(255,140,0,0.8));
+    animation:iconPulse 3s ease-in-out infinite;
+  }
+  @keyframes iconPulse{
+    0%,100%{filter:drop-shadow(0 0 14px rgba(255,140,0,0.7));transform:scale(1);}
+    50%{filter:drop-shadow(0 0 28px rgba(255,215,0,1));transform:scale(1.08);}
+  }
+  .cat-hero-text{ flex:1; min-width:0; }
+  .cat-hero-eyebrow{
+    font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase;
+    color:var(--fire-soft); margin:0 0 6px; display:flex; align-items:center; gap:6px;
+  }
+  .cat-hero-title{
+    font-size:clamp(24px,5vw,44px); color:var(--text); margin:0 0 6px;
+    line-height:1; letter-spacing:0.5px;
+  }
+  .cat-hero-sub{ font-size:13px; color:var(--muted); margin:0 0 14px; }
+  .cat-hero-stats{ display:flex; gap:10px; flex-wrap:wrap; }
   .cat-stat{
-    background:rgba(7,7,14,0.6); backdrop-filter:blur(8px);
-    border:1px solid rgba(255,107,26,0.3); border-radius:8px;
-    padding:8px 16px; font-size:13px; font-weight:600; color:var(--spark-soft);
+    background:rgba(7,7,14,0.5); backdrop-filter:blur(8px);
+    border:1px solid rgba(255,107,26,0.25); border-radius:8px;
+    padding:6px 14px; font-size:12px; font-weight:700; color:var(--spark-soft);
   }
 
   /* ── Breadcrumb ── */
@@ -268,12 +289,13 @@
   .search-count{font-size:12px;color:var(--muted);margin-top:6px;padding-left:2px;}
 
   @media(max-width:640px){
-    header { margin:0; border-radius:0; border-left:none; border-right:none; border-top:none; }
-    .cat-hero{min-height:180px; padding:24px 16px 20px; margin:16px 16px 0; border-radius:16px;}
-    .cat-hero-icon{font-size:32px; margin-bottom:8px;}
-    .cat-hero-title{font-size:28px;}
-    .cat-hero-sub{font-size:13px;}
-    .cat-stat{font-size:11px; padding:5px 10px;}
+    header { margin:0; top:0; border-radius:0; border-left:none; border-right:none; border-top:none; }
+    .cat-hero{ margin:16px 16px 0; padding:0 0; }
+    .cat-hero-inner{ padding:18px 18px 18px 22px; gap:14px; border-radius:16px; }
+    .cat-hero-icon{ font-size:38px; }
+    .cat-hero-title{ font-size:26px; }
+    .cat-hero-sub{ margin-bottom:10px; font-size:12px; }
+    .cat-stat{ font-size:11px; padding:5px 10px; }
     .filter-bar{flex-direction:column; align-items:flex-start; gap:8px; padding:10px 16px;}
     .filter-bar-right{flex-wrap:wrap; gap:6px;}
     .filter-chip{font-size:11px; padding:5px 10px;}
@@ -325,13 +347,14 @@
 
 <!-- HERO -->
 <div class="cat-hero" id="catHero">
-  <div class="cat-hero-bg" id="catHeroBg"></div>
-  <div class="cat-hero-overlay" id="catHeroOverlay"></div>
-  <div class="cat-hero-content">
+  <div class="cat-hero-inner">
     <span class="cat-hero-icon" id="catHeroIcon">🧨</span>
-    <h1 class="cat-hero-title" id="catHeroTitle">Category</h1>
-    <p class="cat-hero-sub" id="catHeroSub">Loading products…</p>
-    <div class="cat-hero-stats" id="catHeroStats"></div>
+    <div class="cat-hero-text">
+      <p class="cat-hero-eyebrow">🏪 Wholesale • M/S Dayal Fire Works</p>
+      <h1 class="cat-hero-title" id="catHeroTitle">Category</h1>
+      <p class="cat-hero-sub" id="catHeroSub">Loading products…</p>
+      <div class="cat-hero-stats" id="catHeroStats"></div>
+    </div>
   </div>
 </div>
 
@@ -423,12 +446,8 @@
     overlay: 'linear-gradient(to top, var(--bg), transparent)'
   };
 
-  // Apply hero overlay gradient to fade smoothly into background
-  document.getElementById('catHeroBg').style.background = theme.bg;
-  document.getElementById('catHeroOverlay').style.background = theme.overlay;
-  if(document.getElementById('skyGradient')) {
-    document.getElementById('skyGradient').style.background = 'transparent';
-  }
+  // Apply hero
+  // (no bg/overlay needed for new design)
 
   // ── Page title and meta ──
   document.title = (catName || 'Products') + ' — M/S Dayal Fire Works';
@@ -446,6 +465,7 @@
   if(particlesEl) particlesEl.style.display = 'none';
 
   // ── Try to load fresh from Firebase ──
+  let catsMeta = dfw_getCachedCategories();
   (async () => {
     try {
       const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
@@ -453,31 +473,56 @@
       const { firebaseConfig } = await import('./firebase-config.js');
       const app = initializeApp(firebaseConfig);
       const db  = getFirestore(app);
+      // Load products
       const snap = await getDocs(collection(db,'products'));
       if (!snap.empty){
         products = snap.docs.map(d=>({id:d.id,...d.data()}));
         dfw_saveCachedProducts(products);
-        renderAll();
       }
+      // Load category meta (icons + images)
+      const catSnap = await getDocs(collection(db,'categories'));
+      catsMeta = {};
+      catSnap.docs.forEach(d=>{ catsMeta[d.id] = d.data(); });
+      dfw_saveCachedCategories(catsMeta);
+      renderAll();
     } catch(e){ console.warn('Firebase load failed, using cache:', e); }
   })();
 
   // ── Render hero ──
   function renderHero(){
     const catProducts = products.filter(p => p.category === catName);
-    const inStock     = catProducts.filter(p => p.stock).length;
+    const inStock     = catProducts.filter(p => p.stock||p.quantity>0).length;
+    const icon = dfw_getCatIcon(catName, catsMeta);
+    const img  = dfw_getCatImage(catName, catsMeta);
 
-    document.getElementById('catHeroIcon').textContent  = dfw_categoryIcon(catName);
-    document.getElementById('catHeroTitle').textContent = dfw_escapeHTML(catName) || 'All Products';
-    document.getElementById('breadcrumbCat').textContent = dfw_escapeHTML(catName);
+    document.getElementById('catHeroIcon').textContent  = icon;
+    document.getElementById('catHeroTitle').textContent = catName || 'All Products';
+    document.getElementById('breadcrumbCat').textContent = catName;
     document.getElementById('catHeroSub').textContent   =
       `${catProducts.length} product${catProducts.length!==1?'s':''} available at wholesale prices`;
+
+    // Apply category image to hero if available
+    const heroInner = document.querySelector('.cat-hero-inner');
+    if(img && heroInner){
+      heroInner.style.backgroundImage = `url('${img}')`;
+      heroInner.style.backgroundSize = 'cover';
+      heroInner.style.backgroundPosition = 'center';
+      // Dark overlay so text stays readable
+      heroInner.style.position = 'relative';
+      if(!heroInner.querySelector('.cat-hero-img-overlay')){
+        const ov = document.createElement('div');
+        ov.className = 'cat-hero-img-overlay';
+        ov.style.cssText = 'position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,0,0,0.7),rgba(0,0,0,0.4));border-radius:inherit;z-index:0;pointer-events:none;';
+        heroInner.insertBefore(ov, heroInner.firstChild);
+      }
+      heroInner.querySelectorAll('.cat-hero-icon,.cat-hero-text,.cat-hero-eyebrow,.cat-hero-title,.cat-hero-sub,.cat-hero-stats').forEach(el=>{ el.style.position='relative'; el.style.zIndex='1'; });
+    }
 
     document.getElementById('catHeroStats').innerHTML = `
       <div class="cat-stat">🛒 ${catProducts.length} Products</div>
       <div class="cat-stat">✅ ${inStock} In Stock</div>
     `;
-    document.getElementById('filterBarTitle').textContent = dfw_escapeHTML(catName) + ' — ' + catProducts.length + ' Products';
+    document.getElementById('filterBarTitle').textContent = catName + ' — ' + catProducts.length + ' Products';
   }
 
   // ── Render products ──
